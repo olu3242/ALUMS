@@ -16,7 +16,7 @@ Orange replaces Forest Green. Green only for verified/approved. Fonts: Manrope/P
 ## Routes
 Public: `/ /about /discover /class-of /sign-in /register /community/[slug] /institution/[slug] /join/[code]`
 Member: `/app/{dashboard,my-classes,profile,alumni,businesses,locations,events,gallery,announcements,dues,network,notifications,settings}`
-Admin: `/admin/{dashboard,members,communities,institutions,institution,roles,permissions,approvals,moderation,dues,security,audit-logs,settings}`
+Admin: `/admin/{dashboard,members,communities,institutions,institution,roles,permissions,approvals,moderation,dues,automations,security,audit-logs,settings}`
 
 ## Security rules
 RLS on every exposed table; server-side authorization; scoped RBAC (platform / institution / community); never trust client role names or user-editable auth metadata; service keys server-only; no stale-JWT-only authorization; audit all privileged mutations; MFA for privileged admins; separation of financial duties.
@@ -28,7 +28,11 @@ No hardcoded admin credentials, fabricated metrics or member counts, invented in
 - `workflow-os/` declarative workflows A–E (membership, profile, business, events, administration)
 - `runtime/` executes steps with typed context, permission checks, audit events
 - `orchestrator/` sequences runs, approval gates, retries, CLI
-Extend by adding a definition in `workflow-os/definitions.ts` and handlers in `runtime/handlers.ts`.
+- `runtime/supabase-handlers.ts` implements EVERY step (idempotent check-or-do; `Waiting`/`Denied` for human/external steps)
+- Postgres engine (migration 0720): `workflow_runs`/`workflow_run_steps` advance automatically from domain triggers; scheduled jobs
+  (`automation_jobs`, `automation_runs`, pg_cron every 15 min) send reminders/escalations once each.
+Extend: add the step to `workflow-os/definitions.ts` AND `private.workflow_steps()` (+ trigger), and a handler in `supabase-handlers.ts`;
+`tests/workflow-parity.test.ts` and the handler-coverage test fail on drift. New job = row in `automation_jobs` + branch in `private.run_job`.
 
 ## Stages
 1 Architecture → 2 Brand/design system → 3 Public experience → 4 Community portal → 5 Administration → 6 Backend integration → 7 Testing → 8 Release prep.

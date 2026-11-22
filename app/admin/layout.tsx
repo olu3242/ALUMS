@@ -19,6 +19,7 @@ const NAV: (NavItem & { perm?: string; scopes?: string[] })[] = [
   { href: "/admin/permissions", label: "Permissions", icon: "list" },
   { href: "/admin/moderation", label: "Moderation", icon: "flag", perm: "moderation.resolve", scopes: ["community"] },
   { href: "/admin/security", label: "Security", icon: "shield" },
+  { href: "/admin/automations", label: "Automations", icon: "layers", perm: "audit.view" },
   { href: "/admin/audit-logs", label: "Audit logs", icon: "scroll", perm: "audit.view" },
   { href: "/admin/settings", label: "Settings", icon: "settings", perm: "community.manage" },
 ];

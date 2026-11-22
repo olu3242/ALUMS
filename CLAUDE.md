@@ -14,9 +14,9 @@ Navy #10243A (structure) · Orange #EA580C (CTAs, active states) · Gold #D8AD58
 Orange replaces Forest Green. Green only for verified/approved. Fonts: Manrope/Plus Jakarta Sans (headings), Inter (body), DM Serif Display (sparingly). No glassmorphism, neon, heavy gradients, or generic graduation-cap logo. WCAG 2.2 AA; light and dark via semantic tokens.
 
 ## Routes
-Public: `/ /about /discover /class-of /sign-in /register /community/[slug]`
-Member: `/app/{dashboard,my-classes,profile,alumni,businesses,locations,events,gallery,announcements,settings}`
-Admin: `/admin/{dashboard,members,communities,institutions,roles,permissions,approvals,moderation,security,audit-logs,settings}`
+Public: `/ /about /discover /class-of /sign-in /register /community/[slug] /institution/[slug]`
+Member: `/app/{dashboard,my-classes,profile,alumni,businesses,locations,events,gallery,announcements,dues,network,notifications,settings}`
+Admin: `/admin/{dashboard,members,communities,institutions,institution,roles,permissions,approvals,moderation,dues,security,audit-logs,settings}`
 
 ## Security rules
 RLS on every exposed table; server-side authorization; scoped RBAC (platform / institution / community); never trust client role names or user-editable auth metadata; service keys server-only; no stale-JWT-only authorization; audit all privileged mutations; MFA for privileged admins; separation of financial duties.

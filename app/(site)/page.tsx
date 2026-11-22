@@ -29,10 +29,12 @@ const FEATURES: FeatureSlide[] = [
     points: ["Private to your class", "Moderated by leaders"] },
   { icon: "megaphone", title: "Announcements", body: "One feed for news from your class leaders.",
     points: ["Pinned updates", "Members notified instantly"] },
+  { icon: "building", title: "Institution network", body: "Branded institution pages with news and opportunities across every class.",
+    points: ["Logo, colours and public page", "Partners, associations and chapters"] },
   { icon: "shield", title: "Lead with guardrails", body: "Class leaders manage members, approvals and events.",
     points: ["Access limited to their own class", "MFA, independent approvals, audit trail"] },
-  { icon: "heart", title: "Welfare & Support", body: "Organise support for classmates with clear approvals.",
-    points: ["Separated financial duties", "Transparent decisions"], tag: "Coming later" },
+  { icon: "heart", title: "Dues & contributions", body: "Pay class dues and see your status at a glance.",
+    points: ["Treasurer-confirmed, never self-approved", "Every payment on an audited ledger"] },
 ];
 
 export default function Home() {
@@ -58,7 +60,7 @@ export default function Home() {
             <figure className="relative hidden animate-rise [animation-delay:120ms] lg:block">
               <div className="overflow-hidden rounded-[28px] border border-gold/50 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
                 <Image src={hero.src} width={hero.width} height={hero.height} alt={hero.alt} priority
-                  sizes="(min-width: 1024px) 560px, 0px" className="aspect-[4/3] h-auto w-full object-cover" />
+                  sizes="(min-width: 1024px) 560px, 0px" className="aspect-[549/310] h-auto w-full object-cover" />
               </div>
               <figcaption className="mt-3 text-right text-xs text-white/60">{AI_IMAGE_LABEL}</figcaption>
             </figure>
@@ -100,11 +102,11 @@ export default function Home() {
 
       {celebrate && (
         <section aria-labelledby="memories" className="container grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-[.9fr_1.1fr]">
-          <Reveal as="div">
+          <Reveal as="div" className="mx-auto w-full max-w-[440px] lg:mx-0">
             <figure>
               <div className="overflow-hidden rounded-[28px] border border-line shadow-lift">
                 <Image src={celebrate.src} width={celebrate.width} height={celebrate.height} alt={celebrate.alt}
-                  sizes="(min-width: 1024px) 480px, 100vw" className="aspect-[4/5] h-auto w-full object-cover" />
+                  sizes="(min-width: 1024px) 440px, 100vw" className="aspect-[441/549] h-auto w-full object-cover" />
               </div>
               <figcaption className="mt-3 text-xs text-muted">{AI_IMAGE_LABEL}</figcaption>
             </figure>

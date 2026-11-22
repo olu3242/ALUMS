@@ -7,6 +7,7 @@ import { applyForMembership, switchCommunity } from "@/lib/actions/membership";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
 import { Field, Input, Textarea } from "@/components/ui/form";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { BrandHero, InstitutionLogo } from "@/components/site/brand-hero";
 import { BackendNotice, Notice } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import type { Community } from "@/lib/types";
@@ -16,7 +17,7 @@ type Params = { params: Promise<{ slug: string }> };
 async function load(slug: string) {
   if (!isBackendConfigured() || !/^[a-z0-9-]{1,80}$/.test(slug)) return null;
   const { data, error } = await (await createClient()).from("class_communities")
-    .select("id, slug, name, department_name, graduation_year, institution_id, status, is_founding, description, institutions(name, status)")
+    .select("id, slug, name, department_name, graduation_year, institution_id, status, is_founding, description, institutions(name, status, slug, logo_path, logo_format, brand_primary, brand_accent, tagline)")
     .eq("slug", slug).maybeSingle<Community>();
   if (error) throw new Error("community lookup failed"); // → error boundary, not a misleading 404
   return data;
@@ -44,20 +45,25 @@ export default async function CommunityPage({ params }: Params) {
     ]);
     membership = m.data; request = r.data;
   }
-  const institution = c.institutions?.status === "verified" ? c.institutions.name : null;
+  const inst = c.institutions?.status === "verified" ? c.institutions : null;
+  const institution = inst?.name ?? null;
 
   return (
     <>
-      <section className="hero-surface py-16 text-white sm:py-20">
-        <div className="container">
-          <div className="flex flex-wrap gap-2">
-            {c.is_founding && <Badge tone="accent" className="bg-transparent text-champagne">Founding community</Badge>}
-            {c.status !== "active" && <StatusBadge status={c.status} />}
+      <BrandHero branding={inst ? { ...inst, name: inst.name } : null} className="py-16 sm:py-20">
+        <div className="container flex flex-col gap-6 sm:flex-row sm:items-center">
+          {inst && <InstitutionLogo b={{ name: inst.name, logo_path: inst.logo_path ?? null, logo_format: inst.logo_format ?? "mark" }} />}
+          <div>
+            <div className="flex flex-wrap gap-2">
+              {c.is_founding && <span className="rounded-full border border-current/40 px-2.5 py-0.5 text-xs font-semibold">Founding community</span>}
+              {c.status !== "active" && <StatusBadge status={c.status} />}
+            </div>
+            <h1 className="mt-4 font-serif text-4xl font-normal sm:text-6xl">{c.name}</h1>
+            <p className="mt-3 text-lg opacity-90">{c.department_name} · Class of {c.graduation_year} ·{" "}
+              {inst?.slug ? <Link href={`/institution/${inst.slug}`} className="underline underline-offset-4">{institution}</Link> : institution ?? "Institution pending confirmation"}</p>
           </div>
-          <h1 className="mt-4 font-serif text-4xl font-normal sm:text-6xl">{c.name}</h1>
-          <p className="mt-3 text-lg text-[#D6DEE9]">{c.department_name} · Class of {c.graduation_year} · {institution ?? "Institution pending confirmation"}</p>
         </div>
-      </section>
+      </BrandHero>
       <section className="container grid gap-10 py-14 lg:grid-cols-[1fr_420px]">
         <div>
           <h2 className="text-xl font-bold">About this class</h2>

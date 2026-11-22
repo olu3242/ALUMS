@@ -23,6 +23,8 @@ export default async function MemberLayout({ children }: { children: React.React
     { href: "/app/events", label: "Events", icon: "calendar" },
     { href: "/app/gallery", label: "Gallery", icon: "image" },
     { href: "/app/announcements", label: "Announcements", icon: "megaphone" },
+    { href: "/app/dues", label: "Dues", icon: "briefcase" },
+    { href: "/app/network", label: "Alumni network", icon: "building" },
     { href: "/app/notifications", label: "Notifications", icon: "bell", badge: unread ?? 0 },
     { href: "/app/profile", label: "My profile", icon: "user" },
     { href: "/app/settings", label: "Settings", icon: "settings" },

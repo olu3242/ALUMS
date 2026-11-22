@@ -9,7 +9,7 @@ import type { AdminScope, Community, Membership, MembershipRequest, Profile } fr
 export const ACTIVE_COMMUNITY_COOKIE = "alums_cid";
 export const ADMIN_SCOPE_COOKIE = "alums_scope";
 
-const COMMUNITY_COLS = "id, slug, name, department_name, graduation_year, institution_id, status, is_founding, description, institutions(name, status)";
+const COMMUNITY_COLS = "id, slug, name, department_name, graduation_year, institution_id, status, is_founding, description, institutions(name, status, slug, logo_path, logo_format, brand_primary, brand_accent, tagline)";
 
 /** Verified user for this request (null when signed out or backend absent). */
 export const getUser = cache(async () => {
@@ -66,6 +66,7 @@ export type AdminContext = {
   current: { scope_type: AdminScope["scope_type"]; scope_id: string | null; label: string };
   permissions: Set<string>;
   maxRank: number;
+  options: { scope_type: AdminScope["scope_type"]; scope_id: string | null; label: string }[];
 };
 
 /** Admin control center context. Returns null when the user administers nothing. */
@@ -80,8 +81,13 @@ export const getAdminContext = cache(async (): Promise<AdminContext | null> => {
   const c = (communities as AdminContext["communities"] | null) ?? [];
   if (s.length === 0) return null;
 
+  const institutions = s.some((x) => x.scope_type === "platform")
+    ? (((await supabase.from("institutions").select("id, name").neq("status", "archived").order("name")).data ?? []) as { id: string; name: string }[])
+    : [];
   const options = [
     ...s.filter((x) => x.scope_type !== "community").map((x) => ({ scope_type: x.scope_type, scope_id: x.scope_id, label: x.label })),
+    ...institutions.filter((i) => !s.some((x) => x.scope_type === "institution" && x.scope_id === i.id))
+      .map((i) => ({ scope_type: "institution" as const, scope_id: i.id, label: i.name })),
     ...c.map((x) => ({ scope_type: "community" as const, scope_id: x.id, label: x.name })),
   ];
   const raw = (await cookies()).get(ADMIN_SCOPE_COOKIE)?.value ?? "";
@@ -93,7 +99,7 @@ export const getAdminContext = cache(async (): Promise<AdminContext | null> => {
       || (current.scope_type === "community" && x.scope_type === "institution"
           && c.find((cc) => cc.id === current.scope_id)?.institution_id === x.scope_id))
     .map((x) => x.max_rank));
-  return { scopes: s, communities: c, current, permissions, maxRank };
+  return { scopes: s, communities: c, current, permissions, maxRank, options };
 });
 
 export async function requireAdmin(permission?: string) {

@@ -147,3 +147,57 @@ export const institutionSchema = z.object({
 
 /** Flatten Zod issues for ActionState. */
 export const fieldErrors = (e: z.ZodError) => e.flatten().fieldErrors as Record<string, string[]>;
+
+// Institution branding & network ------------------------------------------------
+const hexColor = z.string().trim().regex(/^#[0-9a-fA-F]{6}$/, "Use a hex colour like #10243A").optional()
+  .or(z.literal("").transform(() => undefined));
+export const brandingSchema = z.object({
+  institution_id: z.string().uuid(),
+  tagline: optionalText(160),
+  about: optionalText(2000),
+  brand_primary: hexColor,
+  brand_accent: hexColor,
+  logo_format: z.enum(["mark", "wordmark"]).default("mark"),
+  public_page: z.coerce.boolean().default(false),
+});
+export const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
+export const MAX_LOGO_BYTES = 1024 * 1024;
+
+export const institutionPostSchema = z.object({
+  institution_id: z.string().uuid(),
+  kind: z.enum(["news", "opportunity", "event", "spotlight"]),
+  audience: z.enum(["public", "alumni"]),
+  title: trimmed(2, 160),
+  body: trimmed(1, 5000),
+  link_url: optionalUrl,
+});
+export const institutionLinkSchema = z.object({
+  institution_id: z.string().uuid(),
+  kind: z.enum(["partner", "association", "chapter", "social", "other"]),
+  name: trimmed(2, 120),
+  url: optionalUrl,
+  description: optionalText(500),
+});
+
+// Dues -----------------------------------------------------------------------------
+const money = z.string().trim().min(1, "Enter an amount");
+export const duesPlanSchema = z.object({
+  name: trimmed(2, 120),
+  amount: money,
+  currency: z.enum(["NGN", "USD", "GBP", "EUR", "GHS", "KES", "ZAR", "CAD"]),
+  period: z.enum(["one_time", "monthly", "quarterly", "annual"]),
+  due_date: z.string().optional().transform((v) => (v ? v : null)).refine((v) => v === null || /^\d{4}-\d{2}-\d{2}$/.test(v), "Invalid date"),
+  description: optionalText(1000),
+  payment_instructions: optionalText(2000),
+  payment_url: optionalUrl,
+});
+export const PAYMENT_METHODS = ["bank_transfer", "card", "cash", "mobile_money", "other"] as const;
+export const duesPaymentSchema = z.object({
+  plan_id: z.string().uuid(),
+  amount: money,
+  method: z.enum(PAYMENT_METHODS),
+  reference: optionalText(120),
+  period_label: optionalText(40),
+  note: optionalText(500),
+});
+export const recordPaymentSchema = duesPaymentSchema.extend({ user_id: z.string().uuid() });

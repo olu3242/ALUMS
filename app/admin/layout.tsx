@@ -13,6 +13,8 @@ const NAV: (NavItem & { perm?: string; scopes?: string[] })[] = [
   { href: "/admin/members", label: "Members", icon: "users", perm: "member.view", scopes: ["community"] },
   { href: "/admin/communities", label: "Communities", icon: "layers", perm: "community.view_admin" },
   { href: "/admin/institutions", label: "Institutions", icon: "building", perm: "institution.manage", scopes: ["platform"] },
+  { href: "/admin/institution", label: "Institution brand & network", icon: "building", perm: "institution.brand", scopes: ["institution"] },
+  { href: "/admin/dues", label: "Dues", icon: "briefcase", perm: "finance.view", scopes: ["community"] },
   { href: "/admin/roles", label: "Roles", icon: "key", perm: "role.assign" },
   { href: "/admin/permissions", label: "Permissions", icon: "list" },
   { href: "/admin/moderation", label: "Moderation", icon: "flag", perm: "moderation.resolve", scopes: ["community"] },
@@ -29,10 +31,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ...NAV.filter((n) => (!n.perm || ctx.permissions.has(n.perm)) && (!n.scopes || n.scopes.includes(ctx.current.scope_type))),
     { href: "/app/dashboard", label: "Back to member portal", icon: "arrow" as const },
   ];
-  const options = [
-    ...ctx.scopes.filter((s) => s.scope_type !== "community").map((s) => ({ value: `${s.scope_type}:${s.scope_id ?? ""}`, label: s.label })),
-    ...ctx.communities.map((c) => ({ value: `community:${c.id}`, label: c.name })),
-  ];
+  const options = ctx.options.map((o) => ({
+    value: `${o.scope_type}:${o.scope_id ?? ""}`,
+    label: o.scope_type === "institution" ? `${o.label} (institution)` : o.label,
+  }));
   const current = `${ctx.current.scope_type}:${ctx.current.scope_id ?? ""}`;
   return (
     <Shell title="Admin control center" nav={nav} user={{ name: profile?.full_name ?? "", email: user.email }}

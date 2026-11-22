@@ -72,7 +72,7 @@ try {
     await carousel.getByRole("button", { name: "Next feature" }).click();
     await page.waitForTimeout(900);
     const after = await current();
-    await carousel.getByRole("button", { name: "Show Welfare & Support" }).click();
+    await carousel.getByRole("button", { name: "Show Dues & contributions" }).click();
     await page.waitForTimeout(900);
     const last = await current();
     const pause = carousel.getByRole("button", { name: /Pause/ });
@@ -82,7 +82,7 @@ try {
     await page.addScriptTag({ content: axeSource });
     const axe = await page.evaluate(async () => (await window.axe.run(document, { runOnly: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] })).violations
       .map((v) => `${v.id} (${v.impact}): ${v.nodes.slice(0, 2).map((n) => n.target.join(" ")).join(" | ")}`));
-    const ok = before !== after && last === "Show Welfare & Support" && hasPause && slides >= 6 && axe.length === 0;
+    const ok = before !== after && last === "Show Dues & contributions" && hasPause && slides >= 6 && axe.length === 0;
     results.push({ ok, label: "carousel next/dots/pause + axe (motion on)", detail: ok ? [] : [`before=${before} after=${after} last=${last} pause=${hasPause} slides=${slides}`, ...axe] });
     await ctx.close();
   }

@@ -39,7 +39,11 @@ export default {
         card: "0 1px 2px rgb(16 36 58 / 0.06), 0 8px 24px -12px rgb(16 36 58 / 0.18)",
         lift: "0 12px 32px -12px rgb(16 36 58 / 0.28)",
       },
-      keyframes: { rise: { from: { opacity: "0", transform: "translateY(10px)" }, to: { opacity: "1", transform: "none" } } },
+      keyframes: {
+        rise: { from: { opacity: "0", transform: "translateY(10px)" }, to: { opacity: "1", transform: "none" } },
+        grow: { from: { transform: "scaleX(0)" }, to: { transform: "scaleX(1)" } },
+        float: { "0%,100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-18px)" } },
+      },
       animation: { rise: "rise .6s cubic-bezier(.2,.7,.2,1) both" },
     },
   },

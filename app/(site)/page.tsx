@@ -1,27 +1,38 @@
-import Link from "next/link";
+import Image from "next/image";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Icon, type IconName } from "@/components/ui/icons";
-import Image from "next/image";
 import { ClassFinder } from "@/components/site/class-finder";
+import { FeatureCarousel, type FeatureSlide } from "@/components/site/feature-carousel";
+import { Reveal } from "@/components/site/reveal";
 import { AI_IMAGE_LABEL, LANDING_IMAGES } from "@/lib/landing-media";
 
 const STEPS = [
-  ["Find your graduating class", "Search by institution, department and year."],
-  ["Verify your membership", "Class leaders review every request before access is granted."],
-  ["Reconnect with classmates", "Browse the directory and share only what you choose."],
-  ["Build lasting opportunities", "Hire, partner, mentor and meet."],
+  ["Find your class", "Search by institution, department and year."],
+  ["Get verified", "Class leaders review every request."],
+  ["Reconnect", "Share only what you choose."],
+  ["Grow together", "Hire, partner, mentor and meet."],
 ] as const;
 
-const FEATURES: [IconName, string, string, string?][] = [
-  ["users", "Alumni Directory", "Search classmates by name, profession, industry and city."],
-  ["user", "Personal Profiles", "Share your story and career, with privacy set per field."],
-  ["briefcase", "Business Directory", "Discover businesses owned by classmates — reviewed before listing."],
-  ["pin", "Alumni Locations", "Find classmates by country and city, only when they opt in."],
-  ["calendar", "Events & Reunions", "Plan gatherings, collect RSVPs and track attendance."],
-  ["image", "Class Memories", "Keep photographs and milestones in shared albums."],
-  ["megaphone", "Announcements", "Hear from your class leaders in one feed."],
-  ["heart", "Welfare & Support", "Organise support for classmates with clear approvals.", "Coming later"],
+// One carousel replaces the former feature grid + businesses / locations / leadership bands.
+const FEATURES: FeatureSlide[] = [
+  { icon: "users", title: "Alumni Directory", body: "Find classmates by name, profession, industry and city.",
+    points: ["Verified members only", "Filters respect each person's privacy"] },
+  { icon: "user", title: "Personal Profiles", body: "Tell your story since graduation, on your terms.",
+    points: ["Visibility set per field", "Contact details private by default"] },
+  { icon: "briefcase", title: "Business Directory", body: "Discover and support businesses run by classmates.",
+    points: ["Every listing reviewed first", "Owner verification badge"] },
+  { icon: "pin", title: "Alumni Locations", body: "See where your class is in the world — country and city.",
+    points: ["Strictly opt-in, with consent", "Addresses are never collected"] },
+  { icon: "calendar", title: "Events & Reunions", body: "Plan gatherings and know who's coming.",
+    points: ["RSVPs and capacity", "Reminders and attendance"] },
+  { icon: "image", title: "Class Memories", body: "Graduation photos and milestones in shared albums.",
+    points: ["Private to your class", "Moderated by leaders"] },
+  { icon: "megaphone", title: "Announcements", body: "One feed for news from your class leaders.",
+    points: ["Pinned updates", "Members notified instantly"] },
+  { icon: "shield", title: "Lead with guardrails", body: "Class leaders manage members, approvals and events.",
+    points: ["Access limited to their own class", "MFA, independent approvals, audit trail"] },
+  { icon: "heart", title: "Welfare & Support", body: "Organise support for classmates with clear approvals.",
+    points: ["Separated financial duties", "Transparent decisions"], tag: "Coming later" },
 ];
 
 export default function Home() {
@@ -31,18 +42,17 @@ export default function Home() {
       <section className="hero-surface relative overflow-hidden pb-32 pt-16 text-white sm:pt-24">
         <div className={`container relative ${hero ? "grid items-center gap-12 lg:grid-cols-[1.05fr_.95fr]" : ""}`}>
           <div>
-          <div className="gold-rule mb-7" />
-          <h1 className="max-w-[13ch] animate-rise font-serif text-[clamp(2.6rem,7.5vw,5.25rem)] font-normal leading-[1.02] tracking-normal">
-            Your class. Your people. Your network.
-          </h1>
-          <p className="mt-6 max-w-[54ch] animate-rise text-lg text-[#D6DEE9] [animation-delay:80ms]">
-            Graduation was just the beginning. Find your classmates, reconnect with familiar faces and build lasting relationships — inside a
-            verified, private community that belongs to your class.
-          </p>
-          <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:160ms]">
-            <ButtonLink href="#find" size="lg" className="bg-orange-strong text-white">Find my class</ButtonLink>
-            <ButtonLink href="/about" size="lg" variant="onDark">Explore ALUMS</ButtonLink>
-          </div>
+            <div className="gold-rule mb-7 origin-left animate-[grow_.8s_cubic-bezier(.2,.7,.2,1)_both]" />
+            <h1 className="max-w-[13ch] animate-rise font-serif text-[clamp(2.6rem,7.5vw,5.25rem)] font-normal leading-[1.02] tracking-normal">
+              Your class. Your people. Your network.
+            </h1>
+            <p className="mt-6 max-w-[48ch] animate-rise text-lg text-[#D6DEE9] [animation-delay:80ms]">
+              Graduation was just the beginning. Reconnect with classmates in a verified, private community that belongs to your class.
+            </p>
+            <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:160ms]">
+              <ButtonLink href="#find" size="lg" className="bg-orange-strong text-white">Find my class</ButtonLink>
+              <ButtonLink href="#features" size="lg" variant="onDark">See what's inside</ButtonLink>
+            </div>
           </div>
           {hero && (
             <figure className="relative hidden animate-rise [animation-delay:120ms] lg:block">
@@ -54,130 +64,83 @@ export default function Home() {
             </figure>
           )}
         </div>
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-[-10%] h-72 w-72 animate-[float_12s_ease-in-out_infinite] rounded-full border border-gold/20 motion-reduce:animate-none" />
       </section>
 
       <div id="find" className="container relative z-10 -mt-20 scroll-mt-24">
         <ClassFinder />
       </div>
 
-      <section id="how" className="container scroll-mt-20 py-20 sm:py-24">
-        <p className="eyebrow">How it works</p>
-        <h2 className="mt-2 max-w-[22ch] text-3xl font-extrabold sm:text-4xl">From “Class of” to community in four steps</h2>
-        <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <section id="how" aria-labelledby="how-title" className="container scroll-mt-20 py-16 sm:py-20">
+        <Reveal><h2 id="how-title" className="text-center text-2xl font-extrabold sm:text-3xl">From “Class of” to community</h2></Reveal>
+        <ol className="relative mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <span aria-hidden className="absolute left-[12.5%] right-[12.5%] top-6 hidden h-px bg-gradient-to-r from-transparent via-gold/70 to-transparent lg:block" />
           {STEPS.map(([t, d], i) => (
-            <li key={t} className="border-t-[3px] border-accent pt-5">
-              <span className="font-heading text-3xl font-extrabold text-accent-text">{i + 1}</span>
-              <h3 className="mt-2 text-lg font-bold">{t}</h3>
-              <p className="mt-1 text-muted">{d}</p>
-            </li>
+            <Reveal as="li" key={t} delay={i * 120} className="relative text-center">
+              <span className="relative mx-auto grid h-12 w-12 place-items-center rounded-full border-2 border-accent bg-bg font-heading text-lg font-extrabold text-accent-text">{i + 1}</span>
+              <h3 className="mt-4 font-bold">{t}</h3>
+              <p className="mt-1 text-sm text-muted">{d}</p>
+            </Reveal>
           ))}
         </ol>
       </section>
 
-      <section id="features" className="bg-champagne/70 py-20 text-navy dark:bg-surface-2 dark:text-ink sm:py-24">
+      <section id="features" aria-labelledby="features-title" className="scroll-mt-16 overflow-hidden bg-champagne/70 py-16 text-navy dark:bg-surface-2 dark:text-ink sm:py-20">
         <div className="container">
-          <p className="eyebrow text-navy dark:text-accent-text">One home for your class</p>
-          <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">Everything your class needs</h2>
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map(([icon, t, d, tag]) => (
-              <article key={t} className="group rounded-2xl border border-line bg-surface p-6 text-ink shadow-card transition hover:-translate-y-0.5 hover:shadow-lift">
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-navy text-champagne"><Icon name={icon} /></span>
-                  {tag && <Badge>{tag}</Badge>}
-                </div>
-                <h3 className="text-lg font-bold">{t}</h3>
-                <p className="mt-1.5 text-[15px] text-muted">{d}</p>
-              </article>
-            ))}
-          </div>
+          <Reveal className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="eyebrow text-navy dark:text-accent-text">One home for your class</p>
+              <h2 id="features-title" className="mt-2 text-3xl font-extrabold sm:text-4xl">Everything your class needs</h2>
+            </div>
+            <p className="max-w-sm text-[15px] text-navy/75 dark:text-muted">Swipe, use the arrows, or let it play. Every feature is private to verified members.</p>
+          </Reveal>
+          <Reveal delay={100}><FeatureCarousel slides={FEATURES} label="ALUMS features" /></Reveal>
         </div>
       </section>
 
       {celebrate && (
-        <section aria-labelledby="memories" className="container grid items-center gap-10 py-20 sm:py-24 lg:grid-cols-[.9fr_1.1fr]">
-          <figure>
-            <div className="overflow-hidden rounded-[28px] border border-line shadow-lift">
-              <Image src={celebrate.src} width={celebrate.width} height={celebrate.height} alt={celebrate.alt}
-                sizes="(min-width: 1024px) 480px, 100vw" className="aspect-[4/5] h-auto w-full object-cover" />
-            </div>
-            <figcaption className="mt-3 text-xs text-muted">{AI_IMAGE_LABEL}</figcaption>
-          </figure>
-          <div>
+        <section aria-labelledby="memories" className="container grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-[.9fr_1.1fr]">
+          <Reveal as="div">
+            <figure>
+              <div className="overflow-hidden rounded-[28px] border border-line shadow-lift">
+                <Image src={celebrate.src} width={celebrate.width} height={celebrate.height} alt={celebrate.alt}
+                  sizes="(min-width: 1024px) 480px, 100vw" className="aspect-[4/5] h-auto w-full object-cover" />
+              </div>
+              <figcaption className="mt-3 text-xs text-muted">{AI_IMAGE_LABEL}</figcaption>
+            </figure>
+          </Reveal>
+          <Reveal delay={120}>
             <p className="eyebrow">Class memories</p>
             <h2 id="memories" className="mt-2 max-w-[18ch] font-serif text-4xl font-normal sm:text-5xl">The day you threw your caps, together.</h2>
-            <p className="mt-4 max-w-[52ch] text-muted">
-              Graduation photos, reunion moments and milestones live in your class gallery — private to verified classmates, so every
-              gathering adds to your shared story.
-            </p>
-            <ButtonLink href="#find" className="mt-7">Find your class</ButtonLink>
-          </div>
+            <p className="mt-4 max-w-[52ch] text-muted">Graduation photos, reunion moments and milestones — private to verified classmates.</p>
+          </Reveal>
         </section>
       )}
 
-      <section id="community" className="container grid items-center gap-10 py-20 sm:py-24 lg:grid-cols-[1.1fr_.9fr]">
-        <div>
-          <Badge tone="accent">Founding community</Badge>
-          <h2 className="mt-4 text-3xl font-extrabold sm:text-4xl">Accounting — Class of 2007</h2>
-          <p className="mt-4 max-w-[56ch] text-muted">
-            The first community on ALUMS, where the platform is being shaped with real classmates. The institution will be shown once it is
-            verified.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <ButtonLink href="/community/accounting-class-of-2007">View community</ButtonLink>
-            <ButtonLink href="/register?next=/community/accounting-class-of-2007" variant="secondary">Apply for membership</ButtonLink>
+      <section id="community" aria-labelledby="community-title" className="container py-16 sm:py-20">
+        <Reveal className="grid items-center gap-8 rounded-3xl border border-line bg-surface p-7 shadow-card sm:p-10 lg:grid-cols-[1.2fr_.8fr]">
+          <div>
+            <Badge tone="accent">Founding community</Badge>
+            <h2 id="community-title" className="mt-4 text-3xl font-extrabold sm:text-4xl">Accounting — Class of 2007</h2>
+            <p className="mt-3 max-w-[52ch] text-muted">The first community on ALUMS, shaping the platform with real classmates. Its institution is shown once verified.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <ButtonLink href="/community/accounting-class-of-2007">View community</ButtonLink>
+              <ButtonLink href="/register?next=/community/accounting-class-of-2007" variant="secondary">Apply to join</ButtonLink>
+            </div>
           </div>
-        </div>
-        <div className="rounded-2xl border border-line bg-surface p-6 shadow-card">
-          <h3 className="font-heading text-lg font-bold">Class identity</h3>
-          <dl className="mt-4 grid gap-4">
-          {[["Department", "Accounting"], ["Graduation year", "2007"], ["Institution", "Pending confirmation"]].map(([k, v]) => (
-            <div key={k} className="flex justify-between gap-4 border-t border-line pt-4 text-[15px]"><dt className="text-muted">{k}</dt><dd className="font-semibold">{v}</dd></div>
-          ))}
-          </dl>
-        </div>
-      </section>
-
-      <section className="hero-surface py-20 text-white sm:py-24">
-        <div className="container">
-          <h2 className="max-w-[24ch] text-3xl font-extrabold sm:text-4xl">Discover the businesses behind your classmates.</h2>
-          <p className="mt-3 max-w-[56ch] text-[#D6DEE9]">Every listing is reviewed by class leaders before it appears in your class directory.</p>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2">
-            {["Sample Business Name", "Another Sample Business"].map((n) => (
-              <div key={n} className="rounded-2xl border-2 border-dashed border-gold/70 p-6">
-                <span className="rounded-full border border-gold px-2.5 py-0.5 text-xs font-semibold text-champagne">Sample preview — not a real listing</span>
-                <h3 className="mt-4 text-xl font-bold">{n}</h3>
-                <p className="mt-1 text-[#D6DEE9]">Industry · City · Short service summary</p>
-              </div>
+          <dl className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
+            {[["Department", "Accounting"], ["Class of", "2007"], ["Institution", "Pending"]].map(([k, v]) => (
+              <div key={k} className="rounded-2xl bg-surface-2 px-4 py-3"><dt className="text-xs text-muted">{k}</dt><dd className="font-heading font-bold">{v}</dd></div>
             ))}
-          </div>
-        </div>
+          </dl>
+        </Reveal>
       </section>
 
-      <section className="container grid gap-12 py-20 sm:py-24 lg:grid-cols-2">
-        <div>
-          <Icon name="pin" className="h-8 w-8 text-accent-text" />
-          <h2 className="mt-4 text-2xl font-extrabold sm:text-3xl">No matter where life takes you, your class is never far away.</h2>
-          <p className="mt-3 text-muted">Find classmates by country and city. Only members who opt in appear, and precise addresses are never collected.</p>
-        </div>
-        <div>
-          <Icon name="shield" className="h-8 w-8 text-accent-text" />
-          <h2 className="mt-4 text-2xl font-extrabold sm:text-3xl">Lead your class, with guardrails.</h2>
-          <p className="mt-3 text-muted">
-            Class leaders manage members, approvals, events and announcements — with access limited to their own class, multi-factor
-            authentication for critical actions, independent approvals and a permanent audit trail.
-          </p>
-          <Link href="/discover#request" className="mt-4 inline-flex items-center gap-1.5 font-heading font-semibold text-accent-text hover:underline">
-            Request your class community <Icon name="arrow" className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-
-      <section className="bg-navy py-20 text-center text-white sm:py-24">
-        <div className="container">
+      <section className="bg-navy py-16 text-center text-white sm:py-20">
+        <Reveal className="container">
           <h2 className="mx-auto max-w-[20ch] font-serif text-4xl font-normal sm:text-5xl">Your story didn’t end at graduation.</h2>
-          <p className="mx-auto mt-4 max-w-[52ch] text-[#D6DEE9]">Reconnect with the people who were part of your journey and discover what comes next.</p>
           <ButtonLink href="#find" size="lg" className="mt-8 bg-orange-strong text-white">Find your class</ButtonLink>
-        </div>
+        </Reveal>
       </section>
     </>
   );

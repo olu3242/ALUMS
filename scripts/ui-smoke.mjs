@@ -61,6 +61,31 @@ try {
     }
     await page.close();
   }
+  // Feature carousel with motion allowed: controls work, autoplay can be paused, no axe violations mid-animation.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: "no-preference" });
+    const page = await ctx.newPage();
+    await page.goto(base + "/#features", { waitUntil: "networkidle" });
+    const carousel = page.locator('[aria-roledescription="carousel"]');
+    const current = () => carousel.locator('[aria-current="true"]').getAttribute("aria-label");
+    const before = await current();
+    await carousel.getByRole("button", { name: "Next feature" }).click();
+    await page.waitForTimeout(900);
+    const after = await current();
+    await carousel.getByRole("button", { name: "Show Welfare & Support" }).click();
+    await page.waitForTimeout(900);
+    const last = await current();
+    const pause = carousel.getByRole("button", { name: /Pause/ });
+    const hasPause = await pause.count() === 1;
+    if (hasPause) await pause.click();
+    const slides = await carousel.locator('[aria-roledescription="slide"]').count();
+    await page.addScriptTag({ content: axeSource });
+    const axe = await page.evaluate(async () => (await window.axe.run(document, { runOnly: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] })).violations
+      .map((v) => `${v.id} (${v.impact}): ${v.nodes.slice(0, 2).map((n) => n.target.join(" ")).join(" | ")}`));
+    const ok = before !== after && last === "Show Welfare & Support" && hasPause && slides >= 6 && axe.length === 0;
+    results.push({ ok, label: "carousel next/dots/pause + axe (motion on)", detail: ok ? [] : [`before=${before} after=${after} last=${last} pause=${hasPause} slides=${slides}`, ...axe] });
+    await ctx.close();
+  }
   // Protected areas must never render member data without a backend/session.
   const page = await browser.newPage();
   for (const path of ["/app/dashboard", "/admin/dashboard"]) {

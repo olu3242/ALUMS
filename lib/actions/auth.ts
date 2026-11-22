@@ -15,7 +15,7 @@ export async function signIn(_: ActionState, form: FormData): Promise<ActionStat
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
   // Uniform message: don't reveal whether the email exists.
-  if (error) return { error: error.code === "email_not_confirmed" ? "Please confirm your email first — check your inbox." : "Email or password is incorrect." };
+  if (error) return { error: error.code === "email_not_confirmed" ? "Please confirm your email first — check your inbox, or use “Resend confirmation email” below." : "Email or password is incorrect." };
   redirect(safeNext(parsed.data.next));
 }
 
@@ -45,6 +45,19 @@ export async function requestPasswordReset(_: ActionState, form: FormData): Prom
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
   await (await createClient()).auth.resetPasswordForEmail(parsed.data.email, { redirectTo: `${env.siteUrl}/auth/confirm?next=/reset-password` });
   return { ok: true, message: "If an account exists for that email, a reset link is on its way." };
+}
+
+/** Resends the signup confirmation email. Always answers generically so it can't be used to probe which emails exist. */
+export async function resendConfirmation(_: ActionState, form: FormData): Promise<ActionState> {
+  if (!isBackendConfigured()) return NOT_CONFIGURED;
+  const parsed = emailSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+  const { error } = await (await createClient()).auth.resend({
+    type: "signup", email: parsed.data.email, options: { emailRedirectTo: `${env.siteUrl}/auth/confirm?next=/app/my-classes` },
+  });
+  if (error?.status === 429 || error?.code === "over_email_send_rate_limit") return { error: "Please wait a minute before requesting another email." };
+  if (error && error.status && error.status >= 500) return { error: "We couldn't send email right now. Please try again later." };
+  return { ok: true, message: "If that address has an unconfirmed ALUMS account, a new confirmation link is on its way. Check spam too." };
 }
 
 export async function updatePassword(_: ActionState, form: FormData): Promise<ActionState> {

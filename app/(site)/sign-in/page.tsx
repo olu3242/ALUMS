@@ -3,6 +3,7 @@ import { AuthShell } from "@/components/site/auth-shell";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
 import { Field, Input } from "@/components/ui/form";
 import { BackendNotice, Notice } from "@/components/ui/misc";
+import { ResendConfirmation } from "@/components/site/resend-confirmation";
 import { signIn } from "@/lib/actions/auth";
 import { isBackendConfigured } from "@/lib/env";
 
@@ -21,6 +22,7 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<{
         <SubmitButton className="mt-2 w-full" pendingLabel="Signing in…">Sign in</SubmitButton>
         <Link href="/forgot-password" className="text-center text-sm text-muted hover:text-ink">Forgot your password?</Link>
       </ActionForm>
+      <div className="mt-6"><ResendConfirmation /></div>
     </AuthShell>
   );
 }

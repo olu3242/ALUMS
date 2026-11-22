@@ -25,6 +25,8 @@ npm install
 cp .env.example .env.local   # fill NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY
 npm run dev
 ```
+Behind an HTTPS proxy (some sandboxes/CI), Node's `fetch` ignores `HTTPS_PROXY`; use `NODE_USE_ENV_PROXY=1` (`npm run start:proxy`). Not needed on Vercel.
+
 Without Supabase env vars the public site renders and every data surface shows an explicit "backend not connected" state — never sample data.
 
 **Database:** apply `supabase/migrations/*` in order (`supabase db push`, or the SQL editor), then `supabase/seed.sql`. In Supabase Auth: enable email confirmations and TOTP MFA; add `<site>/auth/confirm` to redirect URLs. Bootstrap the first Super Admin once with `supabase/ops/bootstrap-super-admin.sql` (Super Admin is not assignable in-app). Bootstrap **two** platform-level people so independent approvals are possible. Optionally schedule reminders with `supabase/ops/schedule-event-reminders.sql` (pg_cron).

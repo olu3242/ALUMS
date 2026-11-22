@@ -3,7 +3,7 @@ import { ClassFinder } from "@/components/site/class-finder";
 import { CommunityCard } from "@/components/site/community-card";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
 import { Field, Input, Textarea } from "@/components/ui/form";
-import { BackendNotice, EmptyState } from "@/components/ui/misc";
+import { BackendNotice, EmptyState, Notice } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { requestCommunity } from "@/lib/actions/membership";
 import { searchCommunities } from "@/lib/queries/public";
@@ -29,7 +29,9 @@ export default async function Discover({ searchParams }: { searchParams: Promise
 
       <section aria-labelledby="results" className="mt-12">
         <h2 id="results" className="text-xl font-bold">{searched ? "Matching communities" : "Active communities"}</h2>
-        {error === "not-configured" ? <div className="mt-4"><BackendNotice /></div> : hits.length > 0 ? (
+        {error === "not-configured" ? <div className="mt-4"><BackendNotice /></div> : error === "failed" ? (
+          <div className="mt-4"><Notice tone="warning">Class search is temporarily unavailable. Please try again shortly.</Notice></div>
+        ) : hits.length > 0 ? (
           <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{hits.map((c) => <CommunityCard key={c.id} c={c} />)}</div>
         ) : (
           <div className="mt-5">

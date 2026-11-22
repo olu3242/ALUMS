@@ -1,5 +1,5 @@
 import { CommunityCard } from "@/components/site/community-card";
-import { BackendNotice, EmptyState } from "@/components/ui/misc";
+import { BackendNotice, EmptyState, Notice } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { searchCommunities } from "@/lib/queries/public";
 
@@ -14,7 +14,9 @@ export default async function ClassOf() {
     <div className="container py-14">
       <p className="eyebrow">Class Of</p>
       <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">Browse by graduation year</h1>
-      {error === "not-configured" ? <div className="mt-8"><BackendNotice /></div> : years.length === 0 ? (
+      {error === "not-configured" ? <div className="mt-8"><BackendNotice /></div> : error === "failed" ? (
+        <div className="mt-8"><Notice tone="warning">Communities are temporarily unavailable. Please try again shortly.</Notice></div>
+      ) : years.length === 0 ? (
         <div className="mt-8"><EmptyState title="No active communities yet" action={<ButtonLink href="/discover#request">Request your class</ButtonLink>} /></div>
       ) : (
         <>

@@ -15,9 +15,10 @@ type Params = { params: Promise<{ slug: string }> };
 
 async function load(slug: string) {
   if (!isBackendConfigured() || !/^[a-z0-9-]{1,80}$/.test(slug)) return null;
-  const { data } = await (await createClient()).from("class_communities")
+  const { data, error } = await (await createClient()).from("class_communities")
     .select("id, slug, name, department_name, graduation_year, institution_id, status, is_founding, description, institutions(name, status)")
     .eq("slug", slug).maybeSingle<Community>();
+  if (error) throw new Error("community lookup failed"); // → error boundary, not a misleading 404
   return data;
 }
 

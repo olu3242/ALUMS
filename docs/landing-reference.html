@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALUMS — Your Class. Your People. Your Network.</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2310243A'/><circle cx='16' cy='16' r='7' fill='none' stroke='%23EA580C' stroke-width='3'/></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500&family=Manrope:wght@600;800&display=swap">
+<style>
+:root{--navy:#10243A;--orange:#EA580C;--orange-text:#C2410C;--gold:#D8AD58;--champ:#F2DCA5;--bg:#FAF8F3;--surface:#fff;--ink:#1E293B;--slate:#64748B;--line:#E5E7EB;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0B1827;--surface:#10243A;--ink:#F1F5F9;--slate:#A8B3C4;--line:#24384F;--orange-text:#FB923C;color-scheme:dark}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 Inter,system-ui,sans-serif}
+h1,h2,h3{font-family:Manrope,system-ui,sans-serif;line-height:1.15;margin:0}
+.serif{font-family:"DM Serif Display",Georgia,serif;font-weight:400}
+a{color:inherit}.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff}
+header .wrap{display:flex;align-items:center;gap:24px;min-height:64px}
+.logo{display:flex;align-items:center;gap:10px;font:800 22px Manrope,sans-serif;text-decoration:none;letter-spacing:.02em}
+nav{display:flex;gap:18px;margin-left:auto;font-size:15px}nav a{text-decoration:none;opacity:.9}nav a:hover{color:var(--champ)}
+.btn{display:inline-block;padding:12px 22px;border-radius:8px;font:600 16px Manrope,sans-serif;text-decoration:none;border:2px solid var(--orange);cursor:pointer}
+.btn.pri{background:var(--orange);color:#fff}.btn.pri:hover{background:#C2410C;border-color:#C2410C}
+.btn.sec{background:transparent;color:inherit;border-color:currentColor}
+.menu{display:none;background:none;border:2px solid #fff;color:#fff;border-radius:8px;padding:6px 12px;margin-left:auto}
+@media(max-width:860px){nav{display:none;position:absolute;top:64px;left:0;right:0;background:var(--navy);flex-direction:column;padding:16px 24px}nav.open{display:flex}.menu{display:block}header .auth{display:none}}
+.hero{background:var(--navy);color:#fff;padding:72px 0 96px}
+.hero h1{font-size:clamp(2.6rem,7vw,5rem);max-width:12ch}
+.hero p{max-width:52ch;color:#D6DEE9;font-size:1.15rem}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.hero .gold{height:4px;width:72px;background:var(--gold);margin:0 0 24px}
+.finder{background:var(--surface);color:var(--ink);border-radius:12px;padding:24px;margin-top:-56px;box-shadow:0 8px 24px rgba(16,36,58,.14);display:grid;grid-template-columns:repeat(3,1fr) auto;gap:14px;align-items:end;border:1px solid var(--line)}
+.finder label{display:grid;gap:6px;font:600 14px Manrope,sans-serif}
+.finder input{font:inherit;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+@media(max-width:860px){.finder{grid-template-columns:1fr}}
+#result{margin:16px 0 0;padding:16px 20px;border-left:4px solid var(--gold);background:var(--surface);border-radius:0 8px 8px 0;display:none}
+section{padding:80px 0}h2{font-size:clamp(1.8rem,4vw,2.6rem);max-width:22ch}
+.lead{color:var(--slate);max-width:56ch}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;border-top:3px solid var(--orange);padding-top:16px}
+.steps li::before{content:counter(s);font:800 28px Manrope;color:var(--orange-text);display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:40px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px}
+.card h3{font-size:1.15rem;margin-bottom:8px}.card p{margin:0;color:var(--slate);font-size:.98rem}
+.card .ic{width:36px;height:36px;border-radius:8px;background:var(--champ);color:var(--navy);display:grid;place-items:center;margin-bottom:14px;font:800 16px Manrope}
+.band{background:var(--champ);color:var(--navy)}.band .lead{color:#3B4A5E}.band .card{color:var(--ink)}
+.navy{background:var(--navy);color:#fff}.navy .lead{color:#D6DEE9}
+.tag{display:inline-block;font:600 13px Manrope;padding:4px 10px;border-radius:99px;border:1px solid var(--gold);color:var(--orange-text);background:var(--surface)}
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}@media(max-width:860px){.split,.steps{grid-template-columns:1fr}}
+.preview{border:2px dashed var(--gold);border-radius:12px;padding:20px}
+footer{background:var(--navy);color:#D6DEE9;padding:56px 0 32px;font-size:15px}
+.fgrid{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:32px}@media(max-width:860px){.fgrid{grid-template-columns:1fr 1fr}}
+footer h3{color:#fff;font-size:1rem;margin-bottom:10px}footer a{display:block;text-decoration:none;padding:3px 0}footer a:hover{color:var(--champ)}
+@media(prefers-reduced-motion:no-preference){.hero h1{animation:in .7s ease both}@keyframes in{from{opacity:0;transform:translateY(12px)}}}
+</style></head><body>
+<header><div class="wrap">
+<a class="logo" href="#top" aria-label="ALUMS home"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="9" fill="none" stroke="#EA580C" stroke-width="3.5"/><circle cx="16" cy="7" r="3" fill="#D8AD58"/></svg>ALUMS</a>
+<button class="menu" aria-expanded="false" aria-controls="nav" onclick="const n=document.getElementById('nav');const o=n.classList.toggle('open');this.setAttribute('aria-expanded',o)">Menu</button>
+<nav id="nav" aria-label="Primary"><a href="#top">Home</a><a href="#find">Discover Classes</a><a href="#about">About ALUMS</a><a href="#community">Community</a><a href="#businesses">Businesses</a><a href="#events">Events</a><a href="#how">How It Works</a></nav>
+<div class="auth" style="display:flex;gap:10px"><a class="btn sec" href="/sign-in" style="padding:8px 16px">Sign In</a><a class="btn pri" href="/register" style="padding:8px 16px">Join ALUMS</a></div>
+</div></header>
+<main id="top">
+<div class="hero"><div class="wrap"><div class="gold"></div>
+<h1 class="serif">Your class. Your people. Your network.</h1>
+<p>Graduation was just the beginning. Find your classmates, reconnect with familiar faces, discover new opportunities, and build lasting relationships through ALUMS.</p>
+<div class="cta"><a class="btn pri" href="#find">Find My Class</a><a class="btn sec" href="#about">Explore ALUMS</a></div></div></div>
+<div class="wrap" id="find"><form class="finder" onsubmit="event.preventDefault();const r=document.getElementById('result');r.style.display='block';r.textContent='No registered community matches yet. You can request that this class be created, and a class leader will be invited to verify it.'">
+<label>Institution<input name="i" required placeholder="Search your institution"></label>
+<label>Department / Course<input name="d" required placeholder="e.g. Accounting"></label>
+<label>Graduation year<input name="y" required inputmode="numeric" pattern="[0-9]{4}" placeholder="e.g. 2007"></label>
+<button class="btn pri" type="submit">Find My Class</button></form>
+<p id="result" role="status"></p></div>
+
+<section id="how"><div class="wrap"><h2>How ALUMS works</h2>
+<ol class="steps"><li><h3>Find your graduating class</h3><p class="lead">Search by institution, department and year.</p></li>
+<li><h3>Verify your membership</h3><p class="lead">Class leaders review each request.</p></li>
+<li><h3>Reconnect with classmates</h3><p class="lead">Browse the directory and share what you choose.</p></li>
+<li><h3>Build lasting opportunities</h3><p class="lead">Hire, partner, mentor and meet.</p></li></ol></div></section>
+
+<section id="about" class="band"><div class="wrap"><h2>Everything your class needs</h2>
+<div class="grid">
+<div class="card"><div class="ic">A</div><h3>Alumni Directory</h3><p>Search classmates by name, profession, industry and city.</p></div>
+<div class="card"><div class="ic">P</div><h3>Personal Profiles</h3><p>Share your story, career and interests, with privacy set per field.</p></div>
+<div class="card"><div class="ic">B</div><h3>Business Directory</h3><p>List and discover businesses owned by classmates.</p></div>
+<div class="card"><div class="ic">L</div><h3>Alumni Locations</h3><p>Find classmates by country and city when they opt in.</p></div>
+<div class="card"><div class="ic">E</div><h3>Events and Reunions</h3><p>Plan gatherings, collect RSVPs and share photos.</p></div>
+<div class="card"><div class="ic">M</div><h3>Class Memories</h3><p>Keep photographs and milestones in one place.</p></div>
+<div class="card"><div class="ic">N</div><h3>Community Announcements</h3><p>Hear from your class leaders in one feed.</p></div>
+<div class="card"><div class="ic">W</div><h3>Welfare and Support</h3><p>Organize support for classmates, with clear approvals.</p></div></div></div></section>
+
+<section id="community"><div class="wrap split"><div><span class="tag">Founding community</span>
+<h2 style="margin-top:14px">Accounting — Class of 2007</h2>
+<p class="lead">The first community on ALUMS, where the platform is being shaped with real classmates. The institution will be shown once it is verified.</p>
+<a class="btn pri" href="/register">Apply for membership</a></div>
+<div class="card"><h3>Class identity</h3><p>Department: Accounting<br>Graduation year: 2007<br>Institution: pending confirmation</p></div></div></section>
+
+<section id="businesses" class="navy"><div class="wrap"><h2>Discover the businesses behind your classmates.</h2>
+<p class="lead">Every listing is reviewed before it appears in your class directory.</p>
+<div class="grid"><div class="preview"><span class="tag">Sample preview</span><h3 style="margin:12px 0 6px">Sample Business Name</h3><p class="lead" style="margin:0">Industry · City · Short service summary</p></div>
+<div class="preview"><span class="tag">Sample preview</span><h3 style="margin:12px 0 6px">Another Sample Business</h3><p class="lead" style="margin:0">Industry · City · Short service summary</p></div></div></div></section>
+
+<section><div class="wrap"><h2>No matter where life takes you, your class is never far away.</h2>
+<p class="lead">Find classmates by country and city. Only members who opt in appear, and precise addresses are never shown.</p></div></section>
+
+<section id="events" class="band"><div class="wrap"><h2>Memories, milestones and reunions</h2>
+<p class="lead">Class photographs, alumni stories and reunion moments live alongside your events, so every gathering adds to your shared history.</p></div></section>
+
+<section><div class="wrap split"><div><h2>Lead your class community</h2>
+<p class="lead">Class executives manage members, approvals, events and announcements, with access limited to their own class.</p></div>
+<div><a class="btn pri" href="/register">Create Your Class Community</a></div></div></section>
+
+<section class="navy" style="text-align:center"><div class="wrap"><h2 class="serif" style="margin:0 auto 16px;max-width:20ch">Your story didn't end at graduation.</h2>
+<p class="lead" style="margin:0 auto 28px">Reconnect with the people who were part of your journey and discover what comes next.</p>
+<a class="btn pri" href="#find">Find Your Class</a></div></section>
+</main>
+<footer><div class="wrap"><div class="fgrid"><div><a class="logo" href="#top" style="color:#fff">ALUMS</a><p>Your Class. Your People. Your Network.</p></div>
+<div><h3>Explore</h3><a href="#find">Discover Classes</a><a href="#how">How It Works</a><a href="#about">About ALUMS</a></div>
+<div><h3>Communities</h3><a href="#community">Accounting — Class of 2007</a><a href="/register">Create a class</a></div>
+<div><h3>Resources</h3><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/contact">Contact</a></div></div></div></footer>
+</body></html>

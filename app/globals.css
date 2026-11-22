@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ALUMS semantic tokens (RGB channels). Orange #EA580C is the brand accent; filled controls use
+   #C2410C in light mode so white labels meet WCAG 2.2 AA (5.2:1). Green is semantic-only. */
+:root {
+  --bg: 250 248 243; --surface: 255 255 255; --surface-2: 244 240 230;
+  --ink: 30 41 59; --muted: 84 96 115; --line: 229 231 235;
+  --primary: 194 65 12; --primary-fg: 255 255 255;
+  --accent: 234 88 12; --accent-text: 194 65 12;
+  --success: 22 101 52; --warning: 146 96 22; --danger: 180 35 24;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: 9 22 36; --surface: 16 36 58; --surface-2: 22 46 72;
+    --ink: 241 245 249; --muted: 168 179 196; --line: 40 62 88;
+    --primary: 251 146 60; --primary-fg: 16 36 58;
+    --accent: 251 146 60; --accent-text: 251 146 60;
+    --success: 74 222 128; --warning: 251 191 36; --danger: 248 113 113;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: 9 22 36; --surface: 16 36 58; --surface-2: 22 46 72;
+  --ink: 241 245 249; --muted: 168 179 196; --line: 40 62 88;
+  --primary: 251 146 60; --primary-fg: 16 36 58;
+  --accent: 251 146 60; --accent-text: 251 146 60;
+  --success: 74 222 128; --warning: 251 191 36; --danger: 248 113 113;
+  color-scheme: dark;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-bg text-ink font-sans antialiased; font-feature-settings: "cv11", "ss01"; }
+  h1, h2, h3, h4 { @apply font-heading tracking-tight text-balance; }
+  :focus-visible { outline: 3px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 6px; }
+  ::selection { background: #F2DCA5; color: #10243A; }
+}
+
+@layer components {
+  .hero-surface {
+    background:
+      radial-gradient(1100px 420px at 85% -10%, rgb(216 173 88 / 0.16), transparent 60%),
+      radial-gradient(700px 360px at -10% 110%, rgb(234 88 12 / 0.12), transparent 60%),
+      #10243A;
+  }
+  .gold-rule { @apply h-1 w-16 rounded-full bg-gold; }
+  .eyebrow { @apply font-heading text-xs font-bold uppercase tracking-[0.16em] text-accent-text; }
+  .prose-body p + p { @apply mt-3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

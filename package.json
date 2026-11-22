@@ -1,0 +1,45 @@
+{
+  "name": "alums",
+  "version": "2.0.0",
+  "private": true,
+  "description": "ALUMS — alumni community, networking & management SaaS. Founding MVP: Accounting — Class of 2007.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:db": "bash scripts/db-test.sh",
+    "test:ui": "node scripts/ui-smoke.mjs",
+    "start:proxy": "NODE_USE_ENV_PROXY=1 next start",
+    "workflow:list": "tsx automation/orchestrator/cli.ts list",
+    "workflow:run": "tsx automation/orchestrator/cli.ts run"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.119.2",
+    "clsx": "2.1.1",
+    "next": "15.5.29",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1",
+    "tailwind-merge": "2.6.2",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "autoprefixer": "10.7.0",
+    "axe-core": "4.14.1",
+    "playwright": "1.63.0",
+    "postcss": "8.5.33",
+    "tailwindcss": "3.4.19",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

@@ -1,7 +1,9 @@
 export type Community = {
   id: string; slug: string; name: string; department_name: string; graduation_year: number;
   institution_id: string | null; status: "pending_verification" | "active" | "archived"; is_founding: boolean;
-  description: string | null; institutions?: { name: string; status: string } | null;
+  description: string | null;
+  institutions?: { name: string; status: string; slug?: string; logo_path?: string | null; logo_format?: string | null;
+    brand_primary?: string | null; brand_accent?: string | null; tagline?: string | null } | null;
 };
 export type Membership = { id: string; community_id: string; status: "active" | "suspended" | "left"; verified_at: string; class_communities: Community };
 export type MembershipRequest = { id: string; community_id: string; status: string; created_at: string; decision_note: string | null; class_communities: Pick<Community, "name" | "slug"> | null };

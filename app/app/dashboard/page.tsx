@@ -3,6 +3,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState, Notice, PageHeader } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons";
+import { BrandHero, InstitutionLogo } from "@/components/site/brand-hero";
 import { getActiveCommunity, getViewer } from "@/lib/session";
 import { latestAnnouncements, profileCompleteness, upcomingEvents } from "@/lib/queries/member";
 import { formatDateTime } from "@/lib/utils";
@@ -36,15 +37,22 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   return (
     <>
       {notice === "no-admin" && <div className="mb-6"><Notice tone="warning">You don't have an admin role in any scope.</Notice></div>}
-      <section className="hero-surface relative mb-8 overflow-hidden rounded-3xl p-7 text-white sm:p-10">
-        <p className="text-sm font-semibold text-champagne">Welcome back{firstName ? `, ${firstName}` : ""}</p>
-        <h1 className="mt-2 font-serif text-3xl sm:text-5xl">{community.name}</h1>
-        <p className="mt-2 text-[#D6DEE9]">{community.department_name} · Class of {community.graduation_year} · {community.institutions?.status === "verified" ? community.institutions.name : "Institution pending confirmation"}</p>
+      <BrandHero branding={community.institutions?.status === "verified" ? { ...community.institutions } : null} className="mb-8 rounded-3xl p-7 sm:p-10">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          {community.institutions?.status === "verified" && (
+            <InstitutionLogo b={{ name: community.institutions.name, logo_path: community.institutions.logo_path ?? null, logo_format: community.institutions.logo_format ?? "mark" }} />
+          )}
+          <div>
+            <p className="text-sm font-semibold opacity-80">Welcome back{firstName ? `, ${firstName}` : ""}</p>
+            <h1 className="mt-2 font-serif text-3xl sm:text-5xl">{community.name}</h1>
+            <p className="mt-2 opacity-90">{community.department_name} · Class of {community.graduation_year} · {community.institutions?.status === "verified" ? community.institutions.name : "Institution pending confirmation"}</p>
+          </div>
+        </div>
         <div className="mt-6 flex flex-wrap gap-2">
           <ButtonLink href="/app/alumni" size="sm" className="bg-orange-strong text-white">Browse classmates</ButtonLink>
-          <ButtonLink href="/app/events" size="sm" variant="onDark">Events</ButtonLink>
+          <ButtonLink href="/app/dues" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Dues</ButtonLink>
         </div>
-      </section>
+      </BrandHero>
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Card>

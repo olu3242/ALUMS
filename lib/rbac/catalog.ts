@@ -24,6 +24,9 @@ export const PERMISSIONS = {
   "finance.manage": "Manage welfare and contributions (post-MVP)",
   "security.manage": "Manage security policy",
   "platform.settings": "Change platform-wide settings",
+  "institution.brand": "Manage institution logo, colours and public page",
+  "institution.network": "Publish institution news and opportunities, and manage linkages",
+  "finance.view": "View dues plans, payment status and totals",
 } as const;
 export type Permission = keyof typeof PERMISSIONS;
 const ALL = Object.keys(PERMISSIONS) as Permission[];
@@ -42,12 +45,12 @@ export const ROLES: RoleDef[] = [
   { key: "platform_admin", name: "Platform Admin", scope: "platform", rank: 90, requiresApproval: true, financial: false, assignable: true,
     permissions: ALL.filter((p) => p !== "platform.settings") },
   { key: "institution_admin", name: "Institution Admin", scope: "institution", rank: 70, requiresApproval: true, financial: false, assignable: true,
-    permissions: [...COMMUNITY_LEAD, "community.create"] },
-  { key: "class_admin", name: "Class Admin", scope: "community", rank: 50, requiresApproval: true, financial: false, assignable: true, permissions: COMMUNITY_LEAD },
+    permissions: [...COMMUNITY_LEAD, "community.create", "institution.brand", "institution.network", "finance.view"] },
+  { key: "class_admin", name: "Class Admin", scope: "community", rank: 50, requiresApproval: true, financial: false, assignable: true, permissions: [...COMMUNITY_LEAD, "finance.view"] },
   { key: "class_secretary", name: "Class Secretary", scope: "community", rank: 40, requiresApproval: false, financial: false, assignable: true,
     permissions: ["community.view_admin", "member.view", "member.invite", "membership.review", "event.create", "event.manage", "announcement.publish", "gallery.manage"] },
   { key: "class_treasurer", name: "Class Treasurer", scope: "community", rank: 40, requiresApproval: true, financial: true, assignable: true,
-    permissions: ["community.view_admin", "member.view", "finance.manage"] },
+    permissions: ["community.view_admin", "member.view", "finance.manage", "finance.view"] },
   { key: "community_moderator", name: "Community Moderator", scope: "community", rank: 30, requiresApproval: false, financial: false, assignable: true,
     permissions: ["community.view_admin", "member.view", "moderation.resolve", "gallery.manage"] },
   { key: "verified_member", name: "Verified Member", scope: "community", rank: 10, requiresApproval: false, financial: false, assignable: false, permissions: [] },

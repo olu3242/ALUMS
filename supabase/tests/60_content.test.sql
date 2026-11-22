@@ -78,3 +78,8 @@ begin
   perform tests.ok((select count(*) from public.admin_audit_logs('community', v_c)) >= 5, 'community audit trail is readable by its admin');
   perform tests.logout();
 end $$;
+
+do $$
+begin
+  perform tests.ok(exists (select 1 from public.notifications where kind = 'moderation.reported'), 'moderators notified of new reports');
+end $$;

@@ -4,7 +4,8 @@ const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
 
 export default {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
-  darkMode: ["selector", '[data-theme="dark"]'],
+  // Mirrors the token switch in globals.css: system dark unless forced light, or forced dark.
+  darkMode: ["variant", ['@media (prefers-color-scheme: dark) { &:not([data-theme="light"] *) }', '&:is([data-theme="dark"] *)']],
   theme: {
     container: { center: true, padding: "1rem", screens: { "2xl": "1200px" } },
     extend: {

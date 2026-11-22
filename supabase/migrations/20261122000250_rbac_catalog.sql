@@ -55,9 +55,8 @@ select 'community_moderator', unnest(array['community.view_admin','member.view',
 insert into public.role_conflicts (role_a, role_b, reason) values
   ('class_admin', 'class_treasurer', 'Financial duties are separated from community administration (BR-7).');
 
-insert into public.platform_settings (key, value) values
-  ('security.require_mfa_for_privileged', 'true'::jsonb),
-  ('approvals.independent_required',      'true'::jsonb);
+-- Independent approval (BR-7) is enforced structurally (approval_requests check constraint) and is not a setting.
+insert into public.platform_settings (key, value) values ('security.require_mfa_for_privileged', 'true'::jsonb);
 
 insert into public.business_categories (slug, name) values
   ('accounting-finance', 'Accounting & Finance'), ('legal', 'Legal'), ('technology', 'Technology'),

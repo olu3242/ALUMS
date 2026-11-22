@@ -3,7 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "description": "ALUMS — alumni community, networking & management SaaS. Founding MVP: Accounting — Class of 2007.",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -22,6 +24,7 @@
     "next": "15.5.29",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "server-only": "0.0.1",
     "tailwind-merge": "2.6.2",
     "zod": "3.25.76"
   },

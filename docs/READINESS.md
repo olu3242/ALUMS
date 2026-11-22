@@ -7,7 +7,7 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 |---|---|
 | Vercel | Git-linked to `olu3242/ALUMS`. `main` deploys to production and PRs get preview deployments. Production is public (Vercel Authentication turned off for production by decision); member data is protected in-app. |
 | Vercel env | `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). There is no service-role key anywhere. |
-| Supabase schema | Migrations `0100`–`0700` applied. Migration history matches `supabase/migrations/` file versions exactly. |
+| Supabase schema | Migrations `0100`–`0710` applied. Migration history matches `supabase/migrations/` file versions exactly. |
 | Supabase data | Founding class seed. Institution directory: 10,277 entries across 201 countries, including 139 Nigerian. |
 | Supabase Auth | Email confirmation on. TOTP MFA on. Site URL `https://alums-one.vercel.app`. Redirect URLs: prod domain and `http://localhost:3000/**`. Minimum password length 10. |
 | Integrations | GitHub Actions CI (`verify`) and Supabase Preview check, both required to be green before merging. |
@@ -24,8 +24,9 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 | Institution directory (lookup, ranking, Nigeria coverage, write protection, official-name enforcement) | `70_directory` (18) | **PASS** |
 | Institution branding/network (scoped to own institution, storage folder scoping, public vs alumni-only posts) and dues (MFA, SoD, independent confirmation, void, real totals, cross-class isolation) | `80_institution_dues` (33) | **PASS** |
 | Full directory load (10k rows, idempotent re-run) | one-off local run | **PASS** |
+| Affiliations (independent MFA approval, governance granted/withdrawn, duplicate-class guard, either side can end) and invitation codes (permissions, auto-verify vs review, single-use, expiry, revocation, brute-force throttling) | `90_affiliations_invites` (37) | **PASS** |
 | Validation, redirect safety, error mapping, RBAC TS↔SQL parity (v2 catalog), automation runtime, brand contrast, money parsing | Vitest (34) | **PASS** |
-| Responsive + WCAG 2.2 AA (axe), light/dark, public pages, open lookup listbox + keyboard, feature carousel with motion on | `scripts/ui-smoke.mjs` (44) | **PASS** (local, against the live DB) |
+| Responsive + WCAG 2.2 AA (axe), light/dark, public pages incl. `/join/[code]`, open lookup listbox + keyboard, feature carousel with motion on | `scripts/ui-smoke.mjs` (52) | **PASS** (local, against the live DB) |
 | CI on Postgres 17, `tsc`, `next build`, Supabase Preview | GitHub checks | **PASS** |
 | Production: routes, 404s, auth guards, security headers, live DB data | HTTP probes | **PASS** |
 | Production: sign-in rejects bad credentials | Playwright | **PASS** |
@@ -78,6 +79,19 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
   - Brand colours are applied only where text reaches 4.5:1 contrast; otherwise ALUMS navy is used.
   - The public page shows only for verified institutions that opt in.
 - **Alumni network:** posts are public or alumni-only. Alumni are verified members of any class at that institution. Linkages cover partners, associations, chapters and official channels.
+
+## Affiliations and invitation codes
+- **Affiliation:**
+  - A Class Admin requests that their class join a *verified* institution's network.
+  - Approval needs `community.create` at that institution (institution or platform admins), AAL2, and an approver other than the requester.
+  - Approval links the class, which gives the institution's admins oversight of it, branding, alumni-only news and network stats.
+  - Either side can end it with a reason, which removes the oversight immediately. Everything is audited.
+- **Invitation codes:**
+  - Format: `PREFIX-XXXXXX` (32-symbol alphabet, about 10⁹ combinations per prefix).
+  - Members redeem them at `/join/<code>` or under My classes, and need a verified email.
+  - Codes either verify the member immediately (only leaders with `membership.approve` can create these) or create a pending request.
+  - Limits: max uses, expiry (up to 1 year), revocation, and 10 failed attempts per user per hour.
+  - Codes belong to a class community, so there are no platform-wide codes. ALUMS is class-first.
 
 ## Not built (deliberately, so nothing is presented as working)
 - Location map: a list plus a country distribution ships instead.

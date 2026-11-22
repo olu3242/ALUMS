@@ -6,7 +6,7 @@ schemas = ["public"]           # `private` is intentionally NOT exposed through 
 extra_search_path = ["public", "extensions"]
 
 [db]
-major_version = 16
+major_version = 17
 
 [db.seed]
 enabled = true

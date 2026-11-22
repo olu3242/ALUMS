@@ -7,6 +7,7 @@ import { ACTIVE_COMMUNITY_COOKIE, getViewer, requireUser } from "@/lib/session";
 import { applySchema, communityRequestSchema, fieldErrors } from "@/lib/validation";
 import { friendlyError, type ActionState } from "@/lib/errors";
 import { z } from "zod";
+import { safeNext } from "@/lib/utils";
 
 export async function applyForMembership(_: ActionState, form: FormData): Promise<ActionState> {
   await requireUser();
@@ -33,7 +34,8 @@ export async function switchCommunity(form: FormData) {
   const id = z.string().uuid().parse(form.get("community_id"));
   if (!activeMemberships.some((m) => m.community_id === id)) redirect("/app/my-classes");
   (await cookies()).set(ACTIVE_COMMUNITY_COOKIE, id, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 365 });
-  redirect(String(form.get("next") ?? "/app/dashboard").startsWith("/app") ? String(form.get("next")) : "/app/dashboard");
+  const next = safeNext(form.get("next"));
+  redirect(next.startsWith("/app/") ? next : "/app/dashboard");
 }
 
 export async function leaveCommunity(form: FormData) {

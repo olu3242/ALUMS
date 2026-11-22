@@ -22,6 +22,7 @@ begin
   perform tests.ok((select count(*) from public.search_communities(null, 'accounting', 2007)) = 1, 'search finds Accounting 2007');
   perform tests.ok((select institution_name from public.search_communities(null, 'accounting', 2007)) is null,
     'founding community shows no invented institution');
+  perform tests.throws('select created_by from public.class_communities', 'anon cannot read internal community columns', '42501');
   perform tests.throws('select * from public.memberships', 'anon cannot read memberships', '42501');
   perform tests.throws('select * from public.profiles', 'anon cannot read profiles', '42501');
   perform tests.throws('select * from public.audit_logs', 'anon cannot read audit logs', '42501');

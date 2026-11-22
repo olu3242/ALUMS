@@ -108,7 +108,10 @@ $$;
 revoke all on all tables in schema public from anon, authenticated;
 alter default privileges in schema public revoke all on tables from anon, authenticated;
 
-grant select on public.institutions, public.class_communities, public.business_categories to anon;
+-- Anonymous visitors get only public identity columns (no creator/verifier ids).
+grant select (id, name, slug, country, city, website_url, status) on public.institutions to anon;
+grant select (id, slug, name, institution_id, department_name, graduation_year, description, status, is_founding) on public.class_communities to anon;
+grant select on public.business_categories to anon;
 grant select on public.institutions, public.departments, public.class_communities, public.business_categories,
   public.memberships, public.membership_requests, public.invitations, public.community_requests,
   public.permissions, public.roles, public.role_permissions, public.role_conflicts, public.role_assignments,

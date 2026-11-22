@@ -10,8 +10,9 @@ begin
   perform tests.ok(v_missing is null, 'every SECURITY DEFINER function pins search_path (' || coalesce(v_missing, 'ok') || ')');
 
   select string_agg(p.proname, ', ') into v_missing from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') and p.proname <> 'search_communities';
-  perform tests.ok(v_missing is null, 'anon can execute only search_communities (' || coalesce(v_missing, 'ok') || ')');
+  where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')
+    and p.proname not in ('search_communities', 'search_institution_directory', 'institution_directory_countries');
+  perform tests.ok(v_missing is null, 'anon can execute only public lookup RPCs (' || coalesce(v_missing, 'ok') || ')');
 
   perform tests.ok(not has_function_privilege('authenticated', 'private.audit(text, public.scope_type, uuid, text, uuid, jsonb)', 'execute'),
     'authenticated cannot call private.audit directly');

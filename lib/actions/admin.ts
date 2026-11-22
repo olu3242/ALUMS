@@ -129,6 +129,7 @@ export async function createInstitution(_: ActionState, form: FormData): Promise
   const d = parsed.data;
   const { error } = await (await createClient()).rpc("create_institution", {
     p_name: d.name, p_country: d.country, p_city: d.city, p_website_url: d.website_url, p_verified: d.verified,
+    p_directory_id: d.directory_id ?? null,
   });
   return error ? { error: friendlyError(error) } : done("Institution added.");
 }

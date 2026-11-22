@@ -1,57 +1,86 @@
 # ALUMS MVP: readiness report
-_Updated 2026-11-22 · branch `claude/determined-edison-t18uzd` · Verdict: **NOT YET RELEASABLE.** The code is complete for the MVP scope. The database is live on Supabase project `adtwqlhpghmrwyaumcbp`. The signed-in journeys haven't been exercised end-to-end yet._
+_Updated 2026-11-22. Production: **https://alums-one.vercel.app** (Vercel project `alums`, team Eduradius LLC) on Supabase project `adtwqlhpghmrwyaumcbp`._
+_Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys haven't been exercised end-to-end against production, and the email, legal and admin bootstrap items below are still open._
+
+## Environments
+| Item | State |
+|---|---|
+| Vercel | Git-linked to `olu3242/ALUMS`. `main` deploys to production and PRs get preview deployments. Production is public (Vercel Authentication turned off for production by decision); member data is protected in-app. |
+| Vercel env | `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). There is no service-role key anywhere. |
+| Supabase schema | Migrations `0100`–`0620` applied. Migration history matches `supabase/migrations/` file versions exactly. |
+| Supabase data | Founding class seed. Institution directory: 10,277 entries across 201 countries, including 139 Nigerian. |
+| Supabase Auth | Email confirmation on. TOTP MFA on. Site URL `https://alums-one.vercel.app`. Redirect URLs: prod domain and `http://localhost:3000/**`. Minimum password length 10. |
+| Integrations | GitHub Actions CI (`verify`) and Supabase Preview check, both required to be green before merging. |
 
 ## Test results
 | Area (PRD §11) | Suite | Result |
 |---|---|---|
 | RLS coverage, grants, anon surface | `supabase/tests/10_rls_coverage` (15) | **PASS** |
-| Membership workflow A (verify email → apply → review → approve, invitations, suspension) | `20_membership` (28) | **PASS** |
-| Cross-community isolation (members, class admins, institution admins, storage paths) | `30_isolation` (30) | **PASS** |
-| Escalation (rank limits, self-assignment, independent approval, SoD, MFA/AAL2, role lapse, immutable audit) | `40_escalation` (35) | **PASS** |
-| Privacy (per-field visibility, connections, opt-in location, inference-safe filters, unlisting) | `50_privacy` (18) | **PASS** |
-| Businesses, events (capacity, attendance, reminders), announcements, moderation, real metrics | `60_content` (20) | **PASS** |
-| Validation, redirect safety, error mapping | `tests/validation` (9) | **PASS** |
-| RBAC catalog TS ↔ SQL parity, previews | `tests/catalog-sync`, `tests/rbac` (8) | **PASS** |
-| Automation runtime, orchestrator, Supabase handlers | `tests/automation` (10) | **PASS** |
-| Responsive (375/1280 px) + WCAG 2.2 AA (axe), light & dark, public pages | `scripts/ui-smoke.mjs` (42) | **PASS** |
-| Typecheck / production build | `tsc`, `next build` | **PASS** |
-| Live project: 6 migrations + seed applied, 27/27 tables with RLS, 55 policies, bucket present | Management API checks | **PASS** |
-| Live anon surface: founding class discoverable; memberships, internal columns and admin RPCs denied | PostgREST probes | **PASS** |
-| Live public pages incl. `/community/accounting-class-of-2007`, guards redirect via real `getUser()` | UI smoke against the live backend (42) | **PASS** |
-| Live sign-in rejects bad credentials with a generic message | Playwright | **PASS** |
-| Supabase security advisor | `/advisors/security` | **PASS**. Only lint 0029 (signed-in users can call SECURITY DEFINER RPCs), 36 notices, which is intended: each RPC authorizes internally |
-| Signup → confirm email → apply → approve; password reset; TOTP enrolment | — | **NOT RUN**: creates real users and sends real email on the built-in SMTP (2 emails/hour). Needs your go-ahead or a test inbox |
+| Membership workflow A (apply → review → approve, invitations, suspension) | `20_membership` (28) | **PASS** |
+| Cross-community isolation (members, class/institution admins, storage paths) | `30_isolation` (30) | **PASS** |
+| Escalation (rank limits, self-assignment, independent approval, SoD, AAL2, role lapse, immutable audit) | `40_escalation` (35) | **PASS** |
+| Privacy (per-field visibility, connections, opt-in location, inference-safe filters) | `50_privacy` (18) | **PASS** |
+| Businesses, events, announcements, moderation, real metrics | `60_content` (20) | **PASS** |
+| Institution directory (lookup, ranking, Nigeria coverage, write protection, official-name enforcement) | `70_directory` (18) | **PASS** |
+| Full directory load (10k rows, idempotent re-run) | one-off local run | **PASS** |
+| Validation, redirect safety, error mapping, RBAC TS↔SQL parity, automation runtime | Vitest (28) | **PASS** |
+| Responsive + WCAG 2.2 AA (axe), light/dark, public pages, open lookup listbox + keyboard | `scripts/ui-smoke.mjs` (43) | **PASS** (local against live DB, and against production) |
+| CI on Postgres 17, `tsc`, `next build`, Supabase Preview | GitHub checks | **PASS** |
+| Production: routes, 404s, auth guards, security headers, live DB data | HTTP probes | **PASS** |
+| Production: sign-in rejects bad credentials | Playwright | **PASS** |
+| Supabase security advisor | `/advisors/security` | **PASS**. Only lint 0029 (signed-in users can call SECURITY DEFINER RPCs), which is intended: each RPC authorizes internally |
+| Signup → confirm email → apply → approve; password reset; TOTP enrolment (production) | — | **NOT RUN**: creates real users and sends real email; waiting on custom SMTP and a test inbox |
 | Signed-in pages against live data; storage uploads and signed URLs | — | **NOT RUN**: needs a confirmed test account |
-| Accessibility of authenticated pages | — | **NOT RUN** (same dependency) |
 | Lint | — | **NOT RUN** (ESLint not configured; strict `tsc` only) |
 | Load / performance | — | **NOT RUN** |
-
-DB suites run on PostgreSQL 16 with a minimal Supabase `auth`/`storage` stub (`supabase/tests/00_supabase_stub.sql`). They exercise the real migrations, policies and RPCs, but not GoTrue, PostgREST or Storage themselves.
 
 ## Operational readiness
 | Check | Status |
 |---|---|
-| Auth | Supabase Auth with email confirmation; middleware calls `getUser()` (server-verified, not a cookie decode) |
-| RLS | On every public table (test-enforced); default grants revoked; column-level writes |
-| Authorization | Live table checks in SECURITY DEFINER RPCs with pinned `search_path`; no service-role key in the app |
+| Auth | Supabase Auth with email confirmation; middleware uses server-verified `getUser()` |
+| Authorization | RLS on every table (test-enforced); live permission checks in SECURITY DEFINER RPCs with pinned `search_path` |
 | MFA | AAL2 required for role assignment and revocation, approvals, community and institution changes, and platform settings |
-| Audit | Append-only (`UPDATE`/`DELETE`/`TRUNCATE` blocked by triggers), records the real actor |
+| Audit | Append-only (UPDATE, DELETE and TRUNCATE are blocked), records the real actor |
+| Public reference data | The directory lookup is anon-readable; the API route is edge-cached for 1 hour; queries need at least 2 characters and are capped at 25 results |
+| Cron | `private.enqueue_event_reminders()` is idempotent but not scheduled yet (`supabase/ops/schedule-event-reminders.sql`) |
+| Observability | Audit log, notifications, Vercel runtime logs. **Gap:** no error-tracking or metrics sink |
 | Billing protection | N/A: no payments in the MVP |
-| Webhooks | None |
-| Cron | `private.enqueue_event_reminders()` is idempotent; scheduling is opt-in via pg_cron (`supabase/ops`) |
-| Retries | Orchestrator step retries; DB writes are transactional |
-| Telemetry / observability | Audit log and notifications only. **Gap:** no error tracking or metrics sink yet |
 
-## Known gaps and decisions needed before launch
-1. **GTM blockers:** privacy policy and terms (the footer says they're pending, with no dead links). Email delivery for invitations and notifications: invitations currently produce a one-time link for the leader to share, and notifications are in-app only.
-2. **Remaining provisioning:**
-   - Done: migrations, seed, email confirmation and TOTP MFA.
-   - Still needed in Auth settings: minimum password length 6 → 10 (the app enforces 10), and add `<site>/auth/confirm` plus `http://localhost:3000/**` to the redirect URLs. My API change to these was blocked by session permissions.
-   - Set the Site URL once there is a deployed URL.
-   - Configure custom SMTP, because the built-in mailer allows 2 emails/hour.
-   - Bootstrap two platform-level admins.
-   - Set the Vercel env vars.
-3. **Founding institution:** still unconfirmed. Once verified, create the institution and link the community. It is never inferred.
-4. **Not built (deliberately, so nothing is presented as working):** location *map* (a list plus a country distribution ships instead; a tile provider needs choosing), profile photos (initials are used), welfare/contributions (BRD "later"; only the `finance.manage` permission and the SoD rule exist), mentorship matching (only an "open to mentoring" flag), account deletion and data export, the logo system's nine variations and usage guide (one "Alumni Circle" mark is implemented).
-5. **MVP-safe shortcuts and debt:** Performance advisor: 36 unindexed foreign keys (INFO; mostly `*_by` audit columns, so add indexes where joins need them). membership and business approvals don't require AAL2 (only role, approval and platform changes do). Supabase types are handwritten (run `supabase gen types` once a project exists). Directory masking evaluates per row (fine at class scale, revisit at around 10k members per scope). Announcement fan-out is synchronous (move to a queue at scale).
-6. **Brand and accessibility reconciliation:** white text on #EA580C is 3.6:1 and fails AA, so filled buttons use #C2410C (orange-700) and #EA580C stays the accent. The supplied landing HTML used #EA580C buttons. The project brief bans glassmorphism and neon, so the UI follows CLAUDE.md rather than those general style preferences.
+## Launch blockers
+1. **Email:** custom SMTP in Supabase. The built-in mailer allows 2 emails/hour, so signups will stall.
+2. **First admins:** two founders sign up, then run `supabase/ops/bootstrap-super-admin.sql`. Independent approvals need two platform-level people.
+3. **Legal:** privacy policy and terms (the footer says they're pending, with no dead links).
+4. **Founding institution:** still unconfirmed. Once verified, add it from the directory and link the community. It is never inferred.
+5. **End-to-end run** of the signed-in journeys on production (see NOT RUN above).
+
+## Institution directory
+- **Sources:**
+  - Hipo `university-domains-list`, fetched at load time and not vendored. The upstream repo has no license file; its README invites free use.
+  - The ALUMS-curated `data/institutions/curated.json`: 24 Nigerian additions plus 4 corrections of misspelled or outdated upstream names.
+- **Refresh:** run `node scripts/load-institution-directory.mjs --out <dir>`, then apply the files in order (`999_prune.sql` last).
+- **Known gaps:**
+  - Nigerian coverage is now 139 entries, but many state polytechnics and colleges of education are still missing.
+  - Nicknames (e.g. "Legon", "UNILAG") don't match.
+  - Typed names outside the directory still work for search and requests.
+  - Before adding any curated entry, verify it against NUC/NBTE lists.
+- **Separation:** directory entries are reference data. An institution is verified only through `create_institution` (MFA, audited), which keeps a `directory_id` link.
+
+## Not built (deliberately, so nothing is presented as working)
+- Location map: a list plus a country distribution ships instead.
+- Profile photos: initials are used.
+- Welfare and contributions: only `finance.manage` and the separation-of-duties rule exist.
+- Mentorship matching: only an "open to mentoring" flag exists.
+- Account deletion and data export.
+- The logo system's nine variations (one mark is implemented).
+- Landing imagery: AI-generated graduation illustrations exist in Canva but can't be exported through the connector. The landing slots render only once the files are added (`lib/landing-media.ts`), labelled "AI-generated illustration".
+
+## Debt and MVP shortcuts
+- Membership and business approvals don't require AAL2.
+- Supabase types are handwritten.
+- Directory masking runs per row; revisit at around 10k members per scope.
+- Announcement fan-out is synchronous.
+- 36 unindexed `*_by` foreign keys (INFO level).
+- Directory search scans the table per query (about 10k rows, fast today). Move to the `%>` operator and the trigram index if the catalogue grows past about 100k rows.
+
+## Brand and accessibility reconciliation
+White text on #EA580C is 3.6:1, which fails AA. Filled buttons therefore use #C2410C, and #EA580C stays the accent colour. The project brief bans glassmorphism and neon, so CLAUDE.md rules over the general style preferences.

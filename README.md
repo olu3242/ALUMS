@@ -36,6 +36,7 @@ Without Supabase env vars the public site renders and every data surface shows a
 |---|---|
 | `npm test` | Vitest: validation, RBAC mirror ↔ SQL drift, automation runtime/orchestrator/Supabase handlers |
 | `npm run test:db` | Applies all migrations to a throwaway Postgres (or `$DATABASE_URL`) with a Supabase auth/storage stub and runs the RLS / isolation / escalation / privacy / workflow suites |
+| `node scripts/load-institution-directory.mjs --out <dir>` | Builds the worldwide institution directory upsert SQL (Hipo upstream + `data/institutions/curated.json`); apply files in order |
 | `npm run build && npm run test:ui` | Playwright: public pages at 375px & 1280px, light & dark — no horizontal overflow, zero axe WCAG 2.2 AA violations; protected routes never render data |
 
 See `docs/READINESS.md` for the current PASS / FAIL / BLOCKED / NOT RUN report.

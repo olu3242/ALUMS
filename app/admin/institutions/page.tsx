@@ -6,11 +6,14 @@ import { Checkbox, Field, Input, Select } from "@/components/ui/form";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
 import { createInstitution, setInstitutionStatus } from "@/lib/actions/admin";
+import { InstitutionLookup } from "@/components/site/institution-lookup";
+import { getDirectoryCountries } from "@/lib/queries/public";
 
 export const metadata = { title: "Institutions" };
 
 export default async function Institutions() {
   await requireAdmin("institution.manage");
+  const countries = await getDirectoryCountries();
   const { data } = await (await createClient()).from("institutions").select("id, name, country, city, website_url, status").order("name");
   const rows = data ?? [];
   return (
@@ -35,7 +38,11 @@ export default async function Institutions() {
       <Card>
         <h2 className="text-lg font-bold">Add an institution</h2>
         <ActionForm action={createInstitution} resetOnSuccess className="mt-5 grid gap-4 sm:grid-cols-2">
-          <Field label="Name" htmlFor="name" className="sm:col-span-2"><Input id="name" name="name" required maxLength={200} /></Field>
+          <div className="sm:col-span-2">
+            <InstitutionLookup label="Name" name="name" idName="directory_id" countryName="lookup_country" countries={countries} required
+              placeholder="Search the worldwide directory, or type a new name" />
+            <p className="mt-1.5 text-xs text-muted">Picking a directory entry uses its official name and country, and keeps a link to it.</p>
+          </div>
           <Field label="Country" htmlFor="country"><Input id="country" name="country" maxLength={80} /></Field>
           <Field label="City" htmlFor="city"><Input id="city" name="city" maxLength={80} /></Field>
           <Field label="Website" htmlFor="website_url" className="sm:col-span-2"><Input id="website_url" name="website_url" type="url" placeholder="https://" /></Field>

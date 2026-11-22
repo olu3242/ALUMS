@@ -1,0 +1,307 @@
+{
+ "_note": "Curated by the ALUMS team to fill gaps in the upstream catalogue (notably Nigerian universities and polytechnics). Add only institutions verified against official sources (e.g. NUC, NBTE). `corrections` rename upstream entries that are misspelled or use an outdated official name.",
+ "entries": [
+  {
+   "name": "University of Lagos",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Lagos",
+   "kind": "university"
+  },
+  {
+   "name": "Rivers State University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Rivers",
+   "kind": "university"
+  },
+  {
+   "name": "University of Maiduguri",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Borno",
+   "kind": "university"
+  },
+  {
+   "name": "Bayero University Kano",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Kano",
+   "kind": "university"
+  },
+  {
+   "name": "University of Abuja",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Federal Capital Territory",
+   "kind": "university"
+  },
+  {
+   "name": "Olabisi Onabanjo University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ogun",
+   "kind": "university"
+  },
+  {
+   "name": "Ekiti State University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ekiti",
+   "kind": "university"
+  },
+  {
+   "name": "Delta State University, Abraka",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Delta",
+   "kind": "university"
+  },
+  {
+   "name": "Enugu State University of Science and Technology",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Enugu",
+   "kind": "university"
+  },
+  {
+   "name": "Imo State University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Imo",
+   "kind": "university"
+  },
+  {
+   "name": "Nasarawa State University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Nasarawa",
+   "kind": "university"
+  },
+  {
+   "name": "Benue State University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Benue",
+   "kind": "university"
+  },
+  {
+   "name": "Ladoke Akintola University of Technology",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Oyo",
+   "kind": "university"
+  },
+  {
+   "name": "Babcock University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ogun",
+   "kind": "university"
+  },
+  {
+   "name": "Pan-Atlantic University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Lagos",
+   "kind": "university"
+  },
+  {
+   "name": "Ebonyi State University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ebonyi",
+   "kind": "university"
+  },
+  {
+   "name": "Niger Delta University",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Bayelsa",
+   "kind": "university"
+  },
+  {
+   "name": "National Open University of Nigeria",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Federal Capital Territory",
+   "kind": "university"
+  },
+  {
+   "name": "Kaduna Polytechnic",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Kaduna",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Nekede",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Imo",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Ilaro",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ogun",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Bida",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Niger",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Ado-Ekiti",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ekiti",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Oko",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Anambra",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Nasarawa",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Nasarawa",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Mubi",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Adamawa",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Idah",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Kogi",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Bauchi",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Bauchi",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Ede",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Osun",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Federal Polytechnic Ekowe",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Bayelsa",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Akanu Ibiam Federal Polytechnic, Unwana",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ebonyi",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Hussaini Adamu Federal Polytechnic",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Jigawa",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Rufus Giwa Polytechnic",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ondo",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Moshood Abiola Polytechnic",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Ogun",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Delta State Polytechnic, Ogwashi-Uku",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Delta",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Osun State Polytechnic, Iree",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Osun",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Kano State Polytechnic",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Kano",
+   "kind": "polytechnic"
+  },
+  {
+   "name": "Institute of Management and Technology, Enugu",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Enugu",
+   "kind": "college"
+  },
+  {
+   "name": "Petroleum Training Institute",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Delta",
+   "kind": "college"
+  },
+  {
+   "name": "Federal College of Education (Technical), Akoka",
+   "country": "Nigeria",
+   "country_code": "NG",
+   "state_province": "Lagos",
+   "kind": "college"
+  }
+ ],
+ "corrections": [
+  {
+   "country": "Nigeria",
+   "from": "University of Nigeria",
+   "to": "University of Nigeria, Nsukka"
+  },
+  {
+   "country": "Nigeria",
+   "from": "University of Portharcourt",
+   "to": "University of Port Harcourt"
+  },
+  {
+   "country": "Nigeria",
+   "from": "University of Agriculture Abeokuta",
+   "to": "Federal University of Agriculture, Abeokuta"
+  },
+  {
+   "country": "Nigeria",
+   "from": "Kwara State Polytecnic",
+   "to": "Kwara State Polytechnic"
+  }
+ ]
+}

@@ -20,6 +20,7 @@ export const graduationYear = z.coerce.number().int().min(1900).max(thisYear + 6
 
 export const finderSchema = z.object({
   institution: z.string().trim().max(200).optional().default(""),
+  country: z.string().trim().max(80).optional().default(""),
   department: z.string().trim().max(120).optional().default(""),
   year: z.union([graduationYear, z.literal("").transform(() => undefined)]).optional(),
 });
@@ -41,8 +42,11 @@ export const applySchema = z.object({
   note: optionalText(1000),
 });
 
+const optionalId = z.union([z.coerce.number().int().positive(), z.literal("").transform(() => undefined)]).optional();
+
 export const communityRequestSchema = z.object({
   institution_name: trimmed(2, 200),
+  institution_directory_id: optionalId,
   department_name: trimmed(2, 120),
   graduation_year: graduationYear,
   note: optionalText(1000),
@@ -134,6 +138,7 @@ export const createCommunitySchema = z.object({
 
 export const institutionSchema = z.object({
   name: trimmed(2, 200),
+  directory_id: optionalId,
   country: optionalText(80),
   city: optionalText(80),
   website_url: optionalUrl,

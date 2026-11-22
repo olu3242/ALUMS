@@ -6,7 +6,8 @@ import { Field, Input, Textarea } from "@/components/ui/form";
 import { BackendNotice, EmptyState, Notice } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { requestCommunity } from "@/lib/actions/membership";
-import { searchCommunities } from "@/lib/queries/public";
+import { getDirectoryCountries, searchCommunities } from "@/lib/queries/public";
+import { InstitutionLookup } from "@/components/site/institution-lookup";
 import { getUser } from "@/lib/session";
 import { finderSchema } from "@/lib/validation";
 
@@ -15,16 +16,16 @@ export const metadata = { title: "Discover your class" };
 export default async function Discover({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const raw = await searchParams;
   const parsed = finderSchema.safeParse(raw);
-  const q = parsed.success ? parsed.data : { institution: "", department: "", year: undefined };
+  const q = parsed.success ? parsed.data : { institution: "", country: "", department: "", year: undefined };
   const searched = Boolean(q.institution || q.department || q.year);
-  const [{ hits, error }, user] = await Promise.all([searchCommunities(q), getUser()]);
+  const [{ hits, error }, user, countries] = await Promise.all([searchCommunities(q), getUser(), getDirectoryCountries()]);
 
   return (
     <div className="container py-14">
       <p className="eyebrow">Discover</p>
       <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">Find my class</h1>
       <p className="mt-2 max-w-2xl text-muted">Search by institution, department and graduation year. Only verified, active class communities are listed.</p>
-      <ClassFinder className="mt-8" defaults={{ institution: q.institution, department: q.department, year: q.year }} />
+      <ClassFinder className="mt-8" defaults={{ institution: q.institution, country: q.country, department: q.department, year: q.year }} />
       {!parsed.success && <p role="alert" className="mt-3 text-sm text-danger">Enter a valid four-digit graduation year.</p>}
 
       <section aria-labelledby="results" className="mt-12">
@@ -47,8 +48,9 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         <h2 id="request-title" className="text-2xl font-extrabold">Request a missing community</h2>
         <p className="mt-2 max-w-2xl text-muted">Tell us which class you belong to. Requests are reviewed by the ALUMS team — nothing is created automatically.</p>
         {user ? (
-          <ActionForm action={requestCommunity} resetOnSuccess className="mt-6 grid gap-4 md:grid-cols-3">
-            <Field label="Institution" htmlFor="rq-i"><Input id="rq-i" name="institution_name" required defaultValue={q.institution} /></Field>
+          <ActionForm action={requestCommunity} resetOnSuccess className="mt-6 grid gap-4 md:grid-cols-[2fr_1fr_.7fr] md:items-end">
+            <InstitutionLookup name="institution_name" idName="institution_directory_id" countryName="rq_country" countries={countries}
+              defaultValue={q.institution} defaultCountry={q.country} required />
             <Field label="Department / course" htmlFor="rq-d"><Input id="rq-d" name="department_name" required defaultValue={q.department} /></Field>
             <Field label="Graduation year" htmlFor="rq-y"><Input id="rq-y" name="graduation_year" required inputMode="numeric" pattern="[0-9]{4}" defaultValue={q.year} /></Field>
             <Field label="Anything that helps us verify (optional)" htmlFor="rq-n" className="md:col-span-3"><Textarea id="rq-n" name="note" maxLength={1000} /></Field>

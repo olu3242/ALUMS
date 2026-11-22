@@ -10,6 +10,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getViewer, requireCommunity } from "@/lib/session";
 import { deleteBusiness, saveBusiness, submitBusiness } from "@/lib/actions/content";
 import { cn } from "@/lib/utils";
+import { WorkflowSteps } from "@/components/app/workflow-steps";
+import { listRuns } from "@/lib/workflows";
 
 export const metadata = { title: "Business directory" };
 
@@ -33,6 +35,7 @@ export default async function Businesses({ searchParams }: { searchParams: Promi
   const cat = categories?.find((c) => c.slug === sp.category);
   if (cat && tab === "directory") q = q.eq("category_id", cat.id);
   const { data } = tab === "form" ? { data: [] } : await q.returns<Biz[]>();
+  const progress = tab === "mine" ? new Map((await listRuns({ workflowId: "C-business", subjectIds: (data ?? []).map((b) => b.id) })).map((r) => [r.subject_id, r])) : new Map();
   const editing = sp.edit ? (await supabase.from("businesses").select("*").eq("id", sp.edit).eq("owner_id", user.id).maybeSingle<Biz>()).data : null;
 
   const tabs = [["directory", "Directory", "/app/businesses"], ["mine", "My listings", "/app/businesses?tab=mine"], ["form", "Add a business", "/app/businesses?tab=new"]] as const;
@@ -94,6 +97,7 @@ export default async function Businesses({ searchParams }: { searchParams: Promi
                 {b.description && <p className="mt-3 line-clamp-3 text-[15px]">{b.description}</p>}
                 {b.services.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">{b.services.map((s) => <Badge key={s}>{s}</Badge>)}</div>}
                 {tab === "mine" && b.review_note && <p className="mt-3 text-sm text-muted">Reviewer note: {b.review_note}</p>}
+                {tab === "mine" && progress.get(b.id) && <div className="mt-4 rounded-xl bg-surface-2 p-3"><WorkflowSteps steps={progress.get(b.id)!.steps} compact /></div>}
                 <div className="mt-auto flex flex-wrap items-center gap-3 pt-5 text-sm font-semibold">
                   {tab === "directory" && <span className="ml-auto order-last"><ReportButton type="business" id={b.id} /></span>}
                   {tab === "directory" && <Link href={`/app/alumni/${b.owner_id}`} className="text-accent-text hover:underline">Owner profile</Link>}

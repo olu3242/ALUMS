@@ -12,8 +12,10 @@ export async function updateProfile(_: ActionState, form: FormData): Promise<Act
   const visibility = Object.fromEntries(PROFILE_FIELDS.map((f) => [f, String(raw[`vis_${f}`] ?? "private")]));
   const parsed = profileSchema.safeParse({ ...raw, visibility });
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
-  const { error } = await (await createClient()).from("profiles").update(parsed.data).eq("id", user.id);
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update(parsed.data).eq("id", user.id);
   if (error) return { error: friendlyError(error) };
+  await supabase.rpc("workflow_mark_privacy_reviewed"); // saving the form counts as reviewing visibility (Workflow B)
   revalidatePath("/app", "layout");
   return { ok: true, message: "Profile saved." };
 }

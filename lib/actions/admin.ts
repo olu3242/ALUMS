@@ -148,3 +148,13 @@ export async function setPlatformSetting(_: ActionState, form: FormData): Promis
   const { error } = await (await createClient()).rpc("set_platform_setting", { p_key: key, p_value: form.get("value") === "true" });
   return error ? { error: friendlyError(error) } : done("Setting saved.");
 }
+
+export async function runAutomationsNow(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin("audit.view");
+  const job = z.string().regex(/^[a-z_]+$/).optional().parse(form.get("job") || undefined) ?? null;
+  const { data, error } = await (await createClient()).rpc("run_automations_now", { p_job: job });
+  if (error) return { error: friendlyError(error) };
+  const rows = (data as { job_key: string; status: string; processed: number }[] | null) ?? [];
+  revalidatePath("/admin/automations");
+  return { ok: true, message: rows.map((r) => `${r.job_key}: ${r.status} (${r.processed})`).join(" · ") || "Ran." };
+}

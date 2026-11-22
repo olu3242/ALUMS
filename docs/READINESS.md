@@ -7,7 +7,7 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 |---|---|
 | Vercel | Git-linked to `olu3242/ALUMS`. `main` deploys to production and PRs get preview deployments. Production is public (Vercel Authentication turned off for production by decision); member data is protected in-app. |
 | Vercel env | `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). There is no service-role key anywhere. |
-| Supabase schema | Migrations `0100`–`0710` applied. Migration history matches `supabase/migrations/` file versions exactly. |
+| Supabase schema | Migrations `0100`–`0720` applied. `pg_cron` job `alums-automations` runs every 15 minutes. Migration history matches `supabase/migrations/` file versions exactly. |
 | Supabase data | Founding class seed. Institution directory: 10,277 entries across 201 countries, including 139 Nigerian. |
 | Supabase Auth | Email confirmation on. TOTP MFA on. Site URL `https://alums-one.vercel.app`. Redirect URLs: prod domain and `http://localhost:3000/**`. Minimum password length 10. |
 | Integrations | GitHub Actions CI (`verify`) and Supabase Preview check, both required to be green before merging. |
@@ -25,7 +25,9 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 | Institution branding/network (scoped to own institution, storage folder scoping, public vs alumni-only posts) and dues (MFA, SoD, independent confirmation, void, real totals, cross-class isolation) | `80_institution_dues` (33) | **PASS** |
 | Full directory load (10k rows, idempotent re-run) | one-off local run | **PASS** |
 | Affiliations (independent MFA approval, governance granted/withdrawn, duplicate-class guard, either side can end) and invitation codes (permissions, auto-verify vs review, single-use, expiry, revocation, brute-force throttling) | `90_affiliations_invites` (37) | **PASS** |
-| Validation, redirect safety, error mapping, RBAC TS↔SQL parity (v2 catalog), automation runtime, brand contrast, money parsing | Vitest (34) | **PASS** |
+| Workflow OS (A–E advance from real activity, gates wait, actors recorded, visibility) and scheduled automations (exactly-once reminders, paid members skipped, failure isolation, on-demand runs) | `95_workflows_automations` (28) | **PASS** |
+| Validation, redirect safety, error mapping, RBAC TS↔SQL parity, workflow definitions↔SQL parity, handler coverage for every step, runtime waiting/denied/gates, brand contrast, money parsing | Vitest (40) | **PASS** |
+| Production automation cycle: all 7 jobs | `private.run_all_automations()` | **PASS** (all succeeded) |
 | Responsive + WCAG 2.2 AA (axe), light/dark, public pages incl. `/join/[code]`, open lookup listbox + keyboard, feature carousel with motion on | `scripts/ui-smoke.mjs` (52) | **PASS** (local, against the live DB) |
 | CI on Postgres 17, `tsc`, `next build`, Supabase Preview | GitHub checks | **PASS** |
 | Production: routes, 404s, auth guards, security headers, live DB data | HTTP probes | **PASS** |
@@ -44,7 +46,7 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 | MFA | AAL2 required for role assignment and revocation, approvals, community and institution changes, and platform settings |
 | Audit | Append-only (UPDATE, DELETE and TRUNCATE are blocked), records the real actor |
 | Public reference data | The directory lookup is anon-readable; the API route is edge-cached for 1 hour; queries need at least 2 characters and are capped at 25 results |
-| Cron | `private.enqueue_event_reminders()` is idempotent but not scheduled yet (`supabase/ops/schedule-event-reminders.sql`) |
+| Cron | pg_cron runs `private.run_all_automations()` every 15 minutes (7 idempotent jobs, each logged in `automation_runs`; failures are isolated). Admin → Automations shows runs and has a "Run now" button. |
 | Observability | Audit log, notifications, Vercel runtime logs. **Gap:** no error-tracking or metrics sink |
 | Billing protection | N/A: no payments in the MVP |
 

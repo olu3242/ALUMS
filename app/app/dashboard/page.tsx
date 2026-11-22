@@ -4,6 +4,8 @@ import { EmptyState, Notice, PageHeader } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons";
 import { BrandHero, InstitutionLogo } from "@/components/site/brand-hero";
+import { WorkflowSteps } from "@/components/app/workflow-steps";
+import { listRuns } from "@/lib/workflows";
 import { getActiveCommunity, getViewer } from "@/lib/session";
 import { latestAnnouncements, profileCompleteness, upcomingEvents } from "@/lib/queries/member";
 import { formatDateTime } from "@/lib/utils";
@@ -12,7 +14,7 @@ export const metadata = { title: "Dashboard" };
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
   const { notice } = await searchParams;
-  const { profile, requests } = await getViewer();
+  const { profile, requests, user, supabase } = await getViewer();
   const community = await getActiveCommunity();
   const pending = requests.filter((r) => r.status === "pending");
   const completeness = profileCompleteness(profile);
@@ -33,7 +35,15 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     );
   }
 
-  const [events, announcements] = await Promise.all([upcomingEvents(community.id), latestAnnouncements(community.id)]);
+  // Workflow A's final step completes when the member opens their class dashboard (idempotent).
+  await supabase.rpc("workflow_touch_dashboard", { p_community_id: community.id });
+  const [events, announcements, runs] = await Promise.all([
+    upcomingEvents(community.id), latestAnnouncements(community.id), listRuns({ userId: user.id, limit: 20 }),
+  ]);
+  const onboarding = [
+    runs.find((r) => r.workflow_id === "A-membership" && r.community_id === community.id),
+    runs.find((r) => r.workflow_id === "B-profile"),
+  ].filter((r): r is NonNullable<typeof r> => Boolean(r) && r!.state !== "completed" && r!.state !== "cancelled");
   return (
     <>
       {notice === "no-admin" && <div className="mb-6"><Notice tone="warning">You don't have an admin role in any scope.</Notice></div>}
@@ -53,6 +63,20 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <ButtonLink href="/app/dues" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Dues</ButtonLink>
         </div>
       </BrandHero>
+
+      {onboarding.length > 0 && (
+        <Card className="mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle as="h2">Getting started</CardTitle>
+            <Link href="/app/profile" className="text-sm font-semibold text-accent-text hover:underline">Complete your profile →</Link>
+          </div>
+          <div className="mt-4 grid gap-4">
+            {onboarding.map((r) => (
+              <div key={r.id}><p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">{r.name}</p><WorkflowSteps steps={r.steps} /></div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Card>

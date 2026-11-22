@@ -8,6 +8,9 @@ import { NeedsCommunity } from "@/components/app/scope-note";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
 import { inviteMember, setMemberStatus } from "@/lib/actions/admin";
+import { createInviteCode, revokeInviteCode } from "@/lib/actions/network";
+import { Checkbox, Select } from "@/components/ui/form";
+import { env } from "@/lib/env";
 import { roleName } from "@/lib/rbac/catalog";
 import { formatDate } from "@/lib/utils";
 
@@ -17,7 +20,14 @@ type M = { membership_id: string; user_id: string; full_name: string; status: st
 export default async function Members() {
   const ctx = await requireAdmin("member.view");
   if (ctx.current.scope_type !== "community") return <><PageHeader title="Members" /><NeedsCommunity /></>;
-  const { data } = await (await createClient()).rpc("admin_members", { p_community_id: ctx.current.scope_id });
+  const supabase = await createClient();
+  const [{ data }, { data: codes }] = await Promise.all([
+    supabase.rpc("admin_members", { p_community_id: ctx.current.scope_id }),
+    ctx.permissions.has("member.invite")
+      ? supabase.from("invite_codes").select("id, code, label, auto_approve, max_uses, uses, expires_at, revoked_at, created_at").eq("community_id", ctx.current.scope_id!).order("created_at", { ascending: false }).limit(50)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const canAuto = ctx.permissions.has("membership.approve");
   const rows = (data as M[] | null) ?? [];
   const canSuspend = ctx.permissions.has("member.suspend");
   return (
@@ -31,6 +41,43 @@ export default async function Members() {
             <Field label="Email" htmlFor="email" className="flex-1"><Input id="email" name="email" type="email" required /></Field>
             <SubmitButton>Create invitation</SubmitButton>
           </ActionForm>
+        </Card>
+      )}
+      {ctx.permissions.has("member.invite") && (
+        <Card className="mb-8">
+          <h2 className="font-bold">Invitation codes</h2>
+          <p className="text-sm text-muted">Shareable codes for WhatsApp groups, flyers or reunions. Anyone with the code can use it after verifying their email, so set limits.</p>
+          <ActionForm action={createInviteCode} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+            <Field label="Label" htmlFor="ic-label"><Input id="ic-label" name="label" maxLength={80} placeholder="e.g. Class WhatsApp group" /></Field>
+            <Field label="Max uses (optional)" htmlFor="ic-max"><Input id="ic-max" name="max_uses" type="number" min={1} max={10000} placeholder="Unlimited" /></Field>
+            <Field label="Expires after" htmlFor="ic-exp"><Select id="ic-exp" name="expires_in_days" defaultValue="30"><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="365">1 year</option></Select></Field>
+            <SubmitButton>Create code</SubmitButton>
+            <div className="sm:col-span-2 lg:col-span-4">
+              <Checkbox name="auto_approve" disabled={!canAuto} label="Verify members automatically"
+                hint={canAuto ? "Off: people who use the code join the review queue. On: they become verified members immediately — only share with trusted groups." : "Only leaders who can approve members may create auto-verifying codes; your codes send people to the review queue."} />
+            </div>
+          </ActionForm>
+          {(codes ?? []).length > 0 && (
+            <ul className="mt-6 divide-y divide-line">
+              {codes!.map((c) => {
+                const expired = c.expires_at && new Date(c.expires_at) < new Date();
+                const used = c.max_uses !== null && c.uses >= c.max_uses;
+                const state = c.revoked_at ? "revoked" : expired ? "expired" : used ? "used up" : "active";
+                return (
+                  <li key={c.id} className="flex flex-wrap items-center gap-3 py-3 text-sm">
+                    <code className="rounded-lg bg-surface-2 px-2.5 py-1 font-mono text-base font-bold tracking-wider">{c.code}</code>
+                    <span className="min-w-0 flex-1">
+                      <span className="font-semibold">{c.label ?? "Untitled"}</span>
+                      <span className="block text-xs text-muted">{c.auto_approve ? "Auto-verify" : "Review required"} · {c.uses}{c.max_uses ? `/${c.max_uses}` : ""} used{c.expires_at ? ` · expires ${formatDate(c.expires_at)}` : ""}</span>
+                      {state === "active" && <span className="block break-all text-xs text-muted">{env.siteUrl}/join/{c.code}</span>}
+                    </span>
+                    <StatusBadge status={state === "active" ? "active" : state === "revoked" ? "revoked" : "archived"} />
+                    {state === "active" && <form action={revokeInviteCode}><input type="hidden" name="id" value={c.id} /><Button size="sm" variant="ghost">Revoke</Button></form>}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </Card>
       )}
       {rows.length === 0 ? <EmptyState title="No members yet" /> : (

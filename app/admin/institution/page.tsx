@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
 import { addInstitutionLink, deleteInstitutionLink, publishInstitutionPost, saveBranding, setPostStatus } from "@/lib/actions/institution";
 import { contrast, isUsableBackground, readableOn } from "@/lib/brand";
+import { decideAffiliation, revokeAffiliation } from "@/lib/actions/network";
 import { formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Institution brand & network" };
@@ -20,11 +21,21 @@ export default async function InstitutionAdmin() {
   }
   const id = ctx.current.scope_id!;
   const supabase = await createClient();
-  const [{ data: inst }, { data: posts }, { data: links }] = await Promise.all([
+  const [{ data: inst }, { data: posts }, { data: links }, { data: requests }, { data: stats }, { data: approved }] = await Promise.all([
     supabase.from("institutions").select("id, name, slug, status, logo_path, logo_format, brand_primary, brand_accent, tagline, about, public_page").eq("id", id).single(),
     supabase.from("institution_posts").select("id, kind, audience, title, status, published_at").eq("institution_id", id).order("published_at", { ascending: false }).limit(50),
     supabase.from("institution_links").select("id, kind, name, url").eq("institution_id", id).order("sort_order"),
+    supabase.from("community_affiliations").select("id, message, created_at, class_communities(name, department_name, graduation_year)")
+      .eq("institution_id", id).eq("status", "pending").order("created_at"),
+    supabase.rpc("institution_network_stats", { p_institution_id: id }),
+    supabase.from("community_affiliations").select("id, community_id").eq("institution_id", id).eq("status", "approved"),
   ]);
+  const canDecide = ctx.permissions.has("community.create");
+  type Stat = { community_id: string; name: string; slug: string; graduation_year: number; active_members: number; members_30d: number; events_upcoming: number };
+  const groups = (stats as Stat[] | null) ?? [];
+  const affOf = new Map((approved ?? []).map((a) => [a.community_id, a.id]));
+  const pendingReqs = (requests ?? []) as unknown as { id: string; message: string | null; created_at: string;
+    class_communities: { name: string; department_name: string; graduation_year: number } | null }[];
   if (!inst) return <Notice tone="warning">Institution not found.</Notice>;
   const canNetwork = ctx.permissions.has("institution.network");
   const primaryOk = !inst.brand_primary || isUsableBackground(inst.brand_primary);
@@ -68,6 +79,62 @@ export default async function InstitutionAdmin() {
               : <Notice tone="warning">Your primary colour can't carry readable text (below 4.5:1 with white or navy), so ALUMS navy is used instead. Choose a darker or lighter shade.</Notice>
           )}
         </div>
+      </section>
+
+      <section className="mb-10 grid gap-6" aria-labelledby="groups">
+        <div>
+          <h2 id="groups" className="text-lg font-bold">Affiliated alumni groups</h2>
+          <p className="text-sm text-muted">Class communities linked to {inst.name}. Real figures from verified memberships.</p>
+        </div>
+        {canDecide && pendingReqs.length > 0 && (
+          <ul className="grid gap-3">
+            {pendingReqs.map((r) => (
+              <li key={r.id}><Card>
+                <p className="font-semibold">{r.class_communities?.name} <span className="font-normal text-muted">asks to join your network · {formatDate(r.created_at)}</span></p>
+                {r.message && <p className="mt-1 text-sm">“{r.message}”</p>}
+                <ActionForm action={decideAffiliation} className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <input type="hidden" name="id" value={r.id} />
+                  <label className="sr-only" htmlFor={`an-${r.id}`}>Note</label>
+                  <Input id={`an-${r.id}`} name="note" placeholder="Note (optional)" maxLength={1000} />
+                  <SubmitButton name="decision" value="approve">Approve</SubmitButton>
+                  <SubmitButton name="decision" value="reject" variant="secondary">Decline</SubmitButton>
+                </ActionForm>
+              </Card></li>
+            ))}
+          </ul>
+        )}
+        {groups.length === 0 ? <EmptyState title="No affiliated classes yet">Class admins can request affiliation from their community settings.</EmptyState> : (
+          <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <caption className="sr-only">Affiliated class communities</caption>
+              <thead className="border-b border-line bg-surface-2 text-xs uppercase tracking-wider text-muted">
+                <tr><th className="p-3">Class</th><th className="p-3">Members</th><th className="p-3">New (30 days)</th><th className="p-3">Upcoming events</th><th className="p-3"><span className="sr-only">Actions</span></th></tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {groups.map((g) => (
+                  <tr key={g.community_id}>
+                    <td className="p-3 font-semibold"><a className="hover:text-accent-text" href={`/community/${g.slug}`}>{g.name}</a></td>
+                    <td className="p-3 tabular-nums">{g.active_members}</td>
+                    <td className="p-3 tabular-nums">{g.members_30d}</td>
+                    <td className="p-3 tabular-nums">{g.events_upcoming}</td>
+                    <td className="p-3 text-right">
+                      {canDecide && affOf.get(g.community_id) && (
+                        <details><summary className="cursor-pointer text-xs text-muted">Remove</summary>
+                          <ActionForm action={revokeAffiliation} className="mt-2 grid w-56 gap-2">
+                            <input type="hidden" name="id" value={affOf.get(g.community_id)} />
+                            <label className="sr-only" htmlFor={`rv-${g.community_id}`}>Reason</label>
+                            <Input id={`rv-${g.community_id}`} name="reason" required minLength={3} placeholder="Reason" />
+                            <SubmitButton size="sm" variant="danger">Remove from network</SubmitButton>
+                          </ActionForm>
+                        </details>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       {canNetwork && (

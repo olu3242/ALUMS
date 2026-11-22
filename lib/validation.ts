@@ -201,3 +201,17 @@ export const duesPaymentSchema = z.object({
   note: optionalText(500),
 });
 export const recordPaymentSchema = duesPaymentSchema.extend({ user_id: z.string().uuid() });
+
+// Affiliations & invitation codes ------------------------------------------------
+export const affiliationRequestSchema = z.object({
+  community_id: z.string().uuid(),
+  institution_id: z.string().uuid({ message: "Choose an institution" }),
+  message: optionalText(1000),
+});
+export const inviteCodeSchema = z.object({
+  label: optionalText(80),
+  auto_approve: z.coerce.boolean().default(false),
+  max_uses: z.union([z.coerce.number().int().min(1).max(10000), z.literal("").transform(() => null)]).optional().transform((v) => v ?? null),
+  expires_in_days: z.coerce.number().int().min(1).max(365).default(30),
+});
+export const redeemCodeSchema = z.object({ code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2,6}-[A-Z2-9]{6}$/, "That doesn't look like an ALUMS invitation code") });

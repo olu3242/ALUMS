@@ -5,6 +5,9 @@ import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { ButtonLink, Button } from "@/components/ui/button";
 import { getActiveCommunity, getViewer } from "@/lib/session";
 import { leaveCommunity, switchCommunity, withdrawRequest } from "@/lib/actions/membership";
+import { redeemInviteCode } from "@/lib/actions/network";
+import { ActionForm, SubmitButton } from "@/components/ui/action-form";
+import { Input } from "@/components/ui/form";
 import { formatDate } from "@/lib/utils";
 
 export const metadata = { title: "My classes" };
@@ -17,6 +20,14 @@ export default async function MyClasses() {
     <>
       <PageHeader eyebrow="Communities" title="My classes" description="One account, every class you belong to. Each community keeps its own members, leaders and content."
         actions={<ButtonLink href="/discover">Find another class</ButtonLink>} />
+      <Card className="mb-8">
+        <h2 className="font-bold">Have an invitation code?</h2>
+        <ActionForm action={redeemInviteCode} resetOnSuccess className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <label htmlFor="code" className="sr-only">Invitation code</label>
+          <Input id="code" name="code" required placeholder="e.g. ACCO-7KQ2MX" autoCapitalize="characters" autoComplete="off" className="font-mono uppercase sm:max-w-xs" />
+          <SubmitButton pendingLabel="Checking…">Join class</SubmitButton>
+        </ActionForm>
+      </Card>
       {memberships.length === 0 && openRequests.length === 0 && (
         <EmptyState title="You haven't joined a class yet" action={<ButtonLink href="/discover">Find my class</ButtonLink>}>
           Search for your graduating class and apply. Class leaders verify every member.

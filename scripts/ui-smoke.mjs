@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
 const axeSource = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 
-const PAGES = ["/", "/about", "/discover", "/discover?department=accounting&year=2007", "/class-of", "/sign-in", "/register", "/forgot-password", "/verify-email", "/does-not-exist"];
+const PAGES = ["/", "/join/ACCO-7KQ2MX", "/join/not-a-code", "/about", "/discover", "/discover?department=accounting&year=2007", "/class-of", "/sign-in", "/register", "/forgot-password", "/verify-email", "/does-not-exist"];
 const VIEWPORTS = [{ name: "mobile", width: 375, height: 800 }, { name: "desktop", width: 1280, height: 900 }];
 const SCHEMES = ["light", "dark"];
 

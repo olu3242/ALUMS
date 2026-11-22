@@ -52,3 +52,14 @@ describe("safety helpers", () => {
     expect(friendlyError({ code: "42501", message: "x", hint: "mfa_required" })).toMatch(/multi-factor/);
   });
 });
+
+import { communityRequestSchema, institutionSchema } from "@/lib/validation";
+describe("institution directory ids", () => {
+  it("are optional positive integers", () => {
+    const base = { institution_name: "University of Lagos", department_name: "Accounting", graduation_year: "2007" };
+    expect(communityRequestSchema.parse({ ...base, institution_directory_id: "42" }).institution_directory_id).toBe(42);
+    expect(communityRequestSchema.parse({ ...base, institution_directory_id: "" }).institution_directory_id).toBeUndefined();
+    expect(communityRequestSchema.safeParse({ ...base, institution_directory_id: "-1" }).success).toBe(false);
+    expect(institutionSchema.parse({ name: "University of Lagos", directory_id: "7" }).directory_id).toBe(7);
+  });
+});

@@ -43,6 +43,24 @@ try {
     }
     await ctx.close();
   }
+  // Institution lookup: open the suggestion list and scan it (needs a backend with directory data).
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await page.goto(base + "/", { waitUntil: "networkidle" });
+    const box = page.getByRole("combobox", { name: "Institution" });
+    await box.fill("university of");
+    const opened = await page.getByRole("listbox").getByRole("option").first().waitFor({ timeout: 8000 }).then(() => true, () => false);
+    if (!opened) results.push({ ok: true, label: "lookup  open listbox (skipped: no directory data)", detail: [] });
+    else {
+      await box.press("ArrowDown");
+      await page.addScriptTag({ content: axeSource });
+      const axe = await page.evaluate(async () => (await window.axe.run(document, { runOnly: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] })).violations
+        .map((v) => `${v.id} (${v.impact}): ${v.nodes.slice(0, 2).map((n) => n.target.join(" ")).join(" | ")}`));
+      const activeOk = (await box.getAttribute("aria-activedescendant")) !== null;
+      results.push({ ok: axe.length === 0 && activeOk, label: "lookup  open listbox + keyboard focus", detail: [...axe, ...(activeOk ? [] : ["aria-activedescendant not set"])] });
+    }
+    await page.close();
+  }
   // Protected areas must never render member data without a backend/session.
   const page = await browser.newPage();
   for (const path of ["/app/dashboard", "/admin/dashboard"]) {

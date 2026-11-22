@@ -53,6 +53,7 @@ export async function requestCommunity(_: ActionState, form: FormData): Promise<
   const { error } = await (await createClient()).rpc("request_community", {
     p_institution_name: parsed.data.institution_name, p_department_name: parsed.data.department_name,
     p_graduation_year: parsed.data.graduation_year, p_note: parsed.data.note,
+    p_institution_directory_id: parsed.data.institution_directory_id ?? null,
   });
   if (error) return { error: friendlyError(error) };
   return { ok: true, message: "Thanks — the ALUMS team will review your request and invite a class leader to verify it." };

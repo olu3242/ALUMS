@@ -2,7 +2,9 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Icon, type IconName } from "@/components/ui/icons";
+import Image from "next/image";
 import { ClassFinder } from "@/components/site/class-finder";
+import { AI_IMAGE_LABEL, LANDING_IMAGES } from "@/lib/landing-media";
 
 const STEPS = [
   ["Find your graduating class", "Search by institution, department and year."],
@@ -23,10 +25,12 @@ const FEATURES: [IconName, string, string, string?][] = [
 ];
 
 export default function Home() {
+  const { hero, celebrate } = LANDING_IMAGES;
   return (
     <>
       <section className="hero-surface relative overflow-hidden pb-32 pt-16 text-white sm:pt-24">
-        <div className="container relative">
+        <div className={`container relative ${hero ? "grid items-center gap-12 lg:grid-cols-[1.05fr_.95fr]" : ""}`}>
+          <div>
           <div className="gold-rule mb-7" />
           <h1 className="max-w-[13ch] animate-rise font-serif text-[clamp(2.6rem,7.5vw,5.25rem)] font-normal leading-[1.02] tracking-normal">
             Your class. Your people. Your network.
@@ -39,6 +43,16 @@ export default function Home() {
             <ButtonLink href="#find" size="lg" className="bg-orange-strong text-white">Find my class</ButtonLink>
             <ButtonLink href="/about" size="lg" variant="onDark">Explore ALUMS</ButtonLink>
           </div>
+          </div>
+          {hero && (
+            <figure className="relative hidden animate-rise [animation-delay:120ms] lg:block">
+              <div className="overflow-hidden rounded-[28px] border border-gold/50 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
+                <Image src={hero.src} width={hero.width} height={hero.height} alt={hero.alt} priority
+                  sizes="(min-width: 1024px) 560px, 0px" className="aspect-[4/3] h-auto w-full object-cover" />
+              </div>
+              <figcaption className="mt-3 text-right text-xs text-white/60">{AI_IMAGE_LABEL}</figcaption>
+            </figure>
+          )}
         </div>
       </section>
 
@@ -78,6 +92,27 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {celebrate && (
+        <section aria-labelledby="memories" className="container grid items-center gap-10 py-20 sm:py-24 lg:grid-cols-[.9fr_1.1fr]">
+          <figure>
+            <div className="overflow-hidden rounded-[28px] border border-line shadow-lift">
+              <Image src={celebrate.src} width={celebrate.width} height={celebrate.height} alt={celebrate.alt}
+                sizes="(min-width: 1024px) 480px, 100vw" className="aspect-[4/5] h-auto w-full object-cover" />
+            </div>
+            <figcaption className="mt-3 text-xs text-muted">{AI_IMAGE_LABEL}</figcaption>
+          </figure>
+          <div>
+            <p className="eyebrow">Class memories</p>
+            <h2 id="memories" className="mt-2 max-w-[18ch] font-serif text-4xl font-normal sm:text-5xl">The day you threw your caps, together.</h2>
+            <p className="mt-4 max-w-[52ch] text-muted">
+              Graduation photos, reunion moments and milestones live in your class gallery — private to verified classmates, so every
+              gathering adds to your shared story.
+            </p>
+            <ButtonLink href="#find" className="mt-7">Find your class</ButtonLink>
+          </div>
+        </section>
+      )}
 
       <section id="community" className="container grid items-center gap-10 py-20 sm:py-24 lg:grid-cols-[1.1fr_.9fr]">
         <div>

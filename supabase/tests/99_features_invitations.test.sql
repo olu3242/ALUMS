@@ -52,3 +52,21 @@ begin
   perform tests.throws(format('select public.revoke_invitation(%L)', v_inv), 'plain members cannot revoke', '42501');
   perform tests.logout();
 end $$;
+
+-- Admin list view summary: real counts, switch metadata, admin-only.
+do $$
+declare v_c uuid := tests.community('Summary 07'); v_ca uuid := tests.user('ca99s@t.io', 'Summary Admin'); v_m uuid := tests.user('m99s@t.io', 'Summary Member');
+begin
+  perform tests.member(v_c, v_ca); perform tests.role(v_ca, 'class_admin', 'community', v_c); perform tests.member(v_c, v_m);
+  insert into public.announcements (community_id, title, body, author_id, is_pinned) values (v_c, 'Hello', 'Body', v_ca, true);
+  perform tests.login(v_ca);
+  perform public.set_community_feature(v_c, 'dues', false);
+  perform tests.ok((select count(*) = 8 from public.admin_feature_summary(v_c)), 'summary lists all 8 modules');
+  perform tests.ok((select items = 2 from public.admin_feature_summary(v_c) where feature = 'alumni'), 'alumni count is real');
+  perform tests.ok((select items = 1 and detail = '1 pinned' from public.admin_feature_summary(v_c) where feature = 'announcements'), 'announcement count is real');
+  perform tests.ok((select not enabled and switched_by = 'Summary Admin' from public.admin_feature_summary(v_c) where feature = 'dues'), 'switch state and actor shown');
+  perform tests.logout();
+  perform tests.login(v_m);
+  perform tests.throws(format('select * from public.admin_feature_summary(%L)', v_c), 'plain members cannot read the admin summary', '42501');
+  perform tests.logout();
+end $$;

@@ -9,7 +9,7 @@ import type { AdminScope, Community, Membership, MembershipRequest, Profile } fr
 export const ACTIVE_COMMUNITY_COOKIE = "alums_cid";
 export const ADMIN_SCOPE_COOKIE = "alums_scope";
 
-const COMMUNITY_COLS = "id, slug, name, department_name, graduation_year, institution_id, status, is_founding, description, institutions(name, status, slug, logo_path, logo_format, brand_primary, brand_accent, tagline)";
+const COMMUNITY_COLS = "id, slug, name, department_name, graduation_year, institution_id, status, is_founding, description, header_tagline, header_cover_path, institutions(name, status, slug, logo_path, logo_format, brand_primary, brand_accent, tagline)";
 
 /** Verified user for this request (null when signed out or backend absent). */
 export const getUser = cache(async () => {

@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/icons";
 import { BrandHero, InstitutionLogo } from "@/components/site/brand-hero";
 import { WorkflowSteps } from "@/components/app/workflow-steps";
 import { listRuns } from "@/lib/workflows";
-import { getActiveCommunity, getViewer } from "@/lib/session";
+import { getActiveCommunity, getPermissions, getViewer } from "@/lib/session";
 import { latestAnnouncements, profileCompleteness, upcomingEvents } from "@/lib/queries/member";
 import { formatDateTime } from "@/lib/utils";
 
@@ -37,9 +37,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   // Workflow A's final step completes when the member opens their class dashboard (idempotent).
   await supabase.rpc("workflow_touch_dashboard", { p_community_id: community.id });
-  const [events, announcements, runs] = await Promise.all([
+  const [events, announcements, runs, perms, cover] = await Promise.all([
     upcomingEvents(community.id), latestAnnouncements(community.id), listRuns({ userId: user.id, limit: 20 }),
+    getPermissions("community", community.id),
+    community.header_cover_path ? supabase.storage.from("community-media").createSignedUrl(community.header_cover_path, 3600) : null,
   ]);
+  const canEditHeader = perms.has("community.manage");
   const onboarding = [
     runs.find((r) => r.workflow_id === "A-membership" && r.community_id === community.id),
     runs.find((r) => r.workflow_id === "B-profile"),
@@ -47,7 +50,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   return (
     <>
       {notice === "no-admin" && <div className="mb-6"><Notice tone="warning">You don't have an admin role in any scope.</Notice></div>}
-      <BrandHero branding={community.institutions?.status === "verified" ? { ...community.institutions } : null} className="mb-8 rounded-3xl p-7 sm:p-10">
+      <BrandHero branding={community.institutions?.status === "verified" ? { ...community.institutions } : null} className="mb-8 rounded-3xl p-7 sm:p-10" coverUrl={cover?.data?.signedUrl ?? null}>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           {community.institutions?.status === "verified" && (
             <InstitutionLogo b={{ name: community.institutions.name, logo_path: community.institutions.logo_path ?? null, logo_format: community.institutions.logo_format ?? "mark" }} />
@@ -55,12 +58,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <div>
             <p className="text-sm font-semibold opacity-80">Welcome back{firstName ? `, ${firstName}` : ""}</p>
             <h1 className="mt-2 font-serif text-3xl sm:text-5xl">{community.name}</h1>
+            {community.header_tagline && <p className="mt-3 max-w-[60ch] text-lg">{community.header_tagline}</p>}
             <p className="mt-2 opacity-90">{community.department_name} · Class of {community.graduation_year} · {community.institutions?.status === "verified" ? community.institutions.name : "Institution pending confirmation"}</p>
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-2">
           <ButtonLink href="/app/alumni" size="sm" className="bg-orange-strong text-white">Browse classmates</ButtonLink>
           <ButtonLink href="/app/dues" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Dues</ButtonLink>
+          {canEditHeader && <ButtonLink href="/app/dashboard/header" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Edit header</ButtonLink>}
         </div>
       </BrandHero>
 

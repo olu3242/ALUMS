@@ -14,10 +14,18 @@ export function InstitutionLogo({ b, className }: { b: Pick<Branding, "name" | "
 }
 
 /** Hero surface in the institution's colours (contrast-checked; falls back to ALUMS navy). */
-export function BrandHero({ branding, children, className }: { branding?: Partial<Branding> | null; children: React.ReactNode; className?: string }) {
+export function BrandHero({ branding, children, className, coverUrl }: {
+  branding?: Partial<Branding> | null; children: React.ReactNode; className?: string; coverUrl?: string | null;
+}) {
   return (
     <section style={brandVars(branding as Branding | null)}
       className={cn("relative overflow-hidden bg-[var(--brand-bg)] text-[var(--brand-fg)]", className)}>
+      {coverUrl && (<>
+        {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL */}
+        <img src={coverUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+        {/* Brand-colour scrim keeps text at AA contrast over any photo */}
+        <div aria-hidden className="absolute inset-0 bg-[var(--brand-bg)] opacity-[0.82]" />
+      </>)}
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_360px_at_90%_-20%,rgb(255_255_255/0.10),transparent_60%)]" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-1 bg-[var(--brand-accent)]" />
       <div className="relative">{children}</div>

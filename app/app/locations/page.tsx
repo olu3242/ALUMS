@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { requireFeature } from "@/lib/features";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import Link from "next/link";
@@ -9,6 +10,7 @@ export const metadata = { title: "Alumni locations" };
 type Loc = { user_id: string; full_name: string | null; country: string; city: string | null };
 
 export default async function Locations() {
+  await requireFeature("locations");
   const community = await requireCommunity();
   const { data } = await (await createClient()).rpc("community_locations", { p_community_id: community.id });
   const rows = (data as Loc[] | null) ?? [];

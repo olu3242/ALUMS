@@ -10,6 +10,8 @@ import { requestAffiliation, revokeAffiliation } from "@/lib/actions/network";
 import { StatusBadge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/form";
 import { formatDate } from "@/lib/utils";
+import { FeatureSwitches } from "@/components/app/feature-switches";
+import { getFeatures } from "@/lib/features";
 
 export const metadata = { title: "Admin settings" };
 
@@ -40,7 +42,15 @@ export default async function AdminSettings() {
             <div><SubmitButton>Save</SubmitButton></div>
           </ActionForm>
         </Card>
-      ) : !settings && <NeedsCommunity />}
+      ) : !settings && <NeedsCommunity next="/admin/settings" />}
+      {community && (
+        <Card className="mb-8 max-w-3xl">
+          <h2 className="text-lg font-bold">Class features</h2>
+          <p className="text-sm text-muted">Turn sections of the member portal on or off for this class. Turning one off hides it from members; nothing is deleted.
+            Changes need your authenticator code and are audited.{ctx.scopes.some((s) => s.scope_type === "platform") ? " As a platform admin you can also lock a setting so class leaders can't change it." : ""}</p>
+          <div className="mt-3"><FeatureSwitches communityId={community.id} state={await getFeatures(community.id)} isPlatform={ctx.scopes.some((s) => s.scope_type === "platform")} /></div>
+        </Card>
+      )}
       {community && (
         <Card className="mb-8 max-w-3xl">
           <h2 className="text-lg font-bold">Institution affiliation</h2>

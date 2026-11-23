@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { requireFeature } from "@/lib/features";
 import { ReportButton } from "@/components/app/report-button";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
@@ -13,6 +14,7 @@ import { formatDateTime } from "@/lib/utils";
 export const metadata = { title: "Announcements" };
 
 export default async function Announcements() {
+  await requireFeature("announcements");
   const community = await requireCommunity();
   const canPublish = (await communityPermissions(community.id)).has("announcement.publish");
   const { data } = await (await createClient()).from("announcements").select("id, title, body, is_pinned, published_at")

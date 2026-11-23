@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requireFeature } from "@/lib/features";
 import { ReportButton } from "@/components/app/report-button";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ import { cn, formatDateTime } from "@/lib/utils";
 export const metadata = { title: "Event" };
 
 export default async function EventPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ edit?: string; error?: string }> }) {
+  await requireFeature("events");
   const { id } = await params;
   const sp = await searchParams;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();

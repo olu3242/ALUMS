@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireFeature } from "@/lib/features";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
@@ -11,6 +12,7 @@ import { formatDateTime } from "@/lib/utils";
 export const metadata = { title: "Events" };
 
 export default async function Events({ searchParams }: { searchParams: Promise<{ when?: string }> }) {
+  await requireFeature("events");
   const { when } = await searchParams;
   const community = await requireCommunity();
   const perms = await communityPermissions(community.id);

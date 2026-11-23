@@ -7,7 +7,7 @@ import { Field, Input } from "@/components/ui/form";
 import { NeedsCommunity } from "@/components/app/scope-note";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
-import { inviteMember, removeMember, setMemberStatus } from "@/lib/actions/admin";
+import { inviteMember, removeMember, revokeInvitation, setMemberStatus } from "@/lib/actions/admin";
 import { createInviteCode, revokeInviteCode } from "@/lib/actions/network";
 import { Checkbox, Select } from "@/components/ui/form";
 import { env } from "@/lib/env";
@@ -19,14 +19,20 @@ type M = { membership_id: string; user_id: string; full_name: string; status: st
 
 export default async function Members() {
   const ctx = await requireAdmin("member.view");
-  if (ctx.current.scope_type !== "community") return <><PageHeader title="Members" /><NeedsCommunity /></>;
+  if (ctx.current.scope_type !== "community") return <><PageHeader title="Members" /><NeedsCommunity next="/admin/members" /></>;
   const supabase = await createClient();
-  const [{ data }, { data: codes }] = await Promise.all([
+  const [{ data }, { data: codes }, { data: invites }] = await Promise.all([
     supabase.rpc("admin_members", { p_community_id: ctx.current.scope_id }),
     ctx.permissions.has("member.invite")
       ? supabase.from("invite_codes").select("id, code, label, auto_approve, max_uses, uses, expires_at, revoked_at, created_at").eq("community_id", ctx.current.scope_id!).order("created_at", { ascending: false }).limit(50)
       : Promise.resolve({ data: [] }),
+    ctx.permissions.has("member.invite")
+      ? supabase.from("invitations").select("id, email, created_at, expires_at, accepted_at, revoked_at").eq("community_id", ctx.current.scope_id!).order("created_at", { ascending: false }).limit(100)
+      : Promise.resolve({ data: [] }),
   ]);
+  const now = new Date();
+  const inviteState = (i: { accepted_at: string | null; revoked_at: string | null; expires_at: string }) =>
+    i.accepted_at ? "accepted" : i.revoked_at ? "revoked" : new Date(i.expires_at) < now ? "expired" : "pending";
   const canAuto = ctx.permissions.has("membership.approve");
   const rows = (data as M[] | null) ?? [];
   const canSuspend = ctx.permissions.has("member.suspend");
@@ -41,6 +47,25 @@ export default async function Members() {
             <Field label="Email" htmlFor="email" className="flex-1"><Input id="email" name="email" type="email" required /></Field>
             <SubmitButton>Create invitation</SubmitButton>
           </ActionForm>
+          <h3 className="mt-6 text-sm font-bold">Invited classmates ({(invites ?? []).length})</h3>
+          {(invites ?? []).length === 0 ? <p className="mt-1 text-sm text-muted">No invitations sent yet. Invitations you create appear here with their status.</p> : (
+            <ul className="mt-2 divide-y divide-line">
+              {invites!.map((i) => {
+                const st = inviteState(i);
+                return (
+                  <li key={i.id} className="flex flex-wrap items-center gap-3 py-2.5 text-sm">
+                    <span className="min-w-0 flex-1"><span className="break-all font-semibold">{i.email}</span>
+                      <span className="block text-xs text-muted">Sent {formatDate(i.created_at)}{st === "pending" ? ` · expires ${formatDate(i.expires_at)}` : ""}{i.accepted_at ? ` · joined ${formatDate(i.accepted_at)}` : ""}</span></span>
+                    <StatusBadge status={st === "accepted" ? "accepted" : st === "pending" ? "pending" : st === "revoked" ? "revoked" : "archived"} />
+                    {st === "pending" && (
+                      <ActionForm action={revokeInvitation}><input type="hidden" name="id" value={i.id} />
+                        <SubmitButton size="sm" variant="ghost" aria-label={`Revoke invitation for ${i.email}`}>Revoke</SubmitButton></ActionForm>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </Card>
       )}
       {ctx.permissions.has("member.invite") && (
@@ -80,6 +105,7 @@ export default async function Members() {
           )}
         </Card>
       )}
+      <h2 className="mb-3 text-lg font-bold">Class members ({rows.length})</h2>
       {rows.length === 0 ? <EmptyState title="No members yet" /> : (
         <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
           <table className="w-full min-w-[640px] text-left text-sm">

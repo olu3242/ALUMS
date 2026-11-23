@@ -19,7 +19,7 @@ type Pay = { id: string; plan_name: string; payer_id: string; payer_name: string
 
 export default async function DuesAdmin() {
   const ctx = await requireAdmin("finance.view");
-  if (ctx.current.scope_type !== "community") return <><PageHeader title="Dues" /><NeedsCommunity /></>;
+  if (ctx.current.scope_type !== "community") return <><PageHeader title="Dues" /><NeedsCommunity next="/admin/dues" /></>;
   const cid = ctx.current.scope_id!;
   const manage = ctx.permissions.has("finance.manage");
   const { user } = await getViewer();

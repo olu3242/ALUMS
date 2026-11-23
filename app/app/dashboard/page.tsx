@@ -7,6 +7,7 @@ import { BrandHero, InstitutionLogo } from "@/components/site/brand-hero";
 import { WorkflowSteps } from "@/components/app/workflow-steps";
 import { listRuns } from "@/lib/workflows";
 import { getActiveCommunity, getPermissions, getViewer } from "@/lib/session";
+import { getFeatures } from "@/lib/features";
 import { latestAnnouncements, profileCompleteness, upcomingEvents } from "@/lib/queries/member";
 import { formatDateTime } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     community.header_cover_path ? supabase.storage.from("community-media").createSignedUrl(community.header_cover_path, 3600) : null,
   ]);
   const canEditHeader = perms.has("community.manage");
+  const on = await getFeatures(community.id);
   const onboarding = [
     runs.find((r) => r.workflow_id === "A-membership" && r.community_id === community.id),
     runs.find((r) => r.workflow_id === "B-profile"),
@@ -50,6 +52,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   return (
     <>
       {notice === "no-admin" && <div className="mb-6"><Notice tone="warning">You don't have an admin role in any scope.</Notice></div>}
+      {notice === "feature-off" && <div className="mb-6"><Notice>That section is turned off for this class by its leaders.</Notice></div>}
       <BrandHero branding={community.institutions?.status === "verified" ? { ...community.institutions } : null} className="mb-8 rounded-3xl p-7 sm:p-10" coverUrl={cover?.data?.signedUrl ?? null}>
         {canEditHeader && (
           <Link href="/app/dashboard/header" aria-label={`Edit ${community.name} header`}
@@ -69,8 +72,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-2">
-          <ButtonLink href="/app/alumni" size="sm" className="bg-orange-strong text-white">Browse classmates</ButtonLink>
-          <ButtonLink href="/app/dues" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Dues</ButtonLink>
+          {on.alumni.enabled && <ButtonLink href="/app/alumni" size="sm" className="bg-orange-strong text-white">Browse classmates</ButtonLink>}
+          {on.dues.enabled && <ButtonLink href="/app/dues" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Dues</ButtonLink>}
 
         </div>
       </BrandHero>
@@ -99,7 +102,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <ButtonLink href="/app/profile" variant="secondary" size="sm" className="mt-5">{completeness.pct === 100 ? "Review profile" : "Complete profile"}</ButtonLink>
         </Card>
 
-        <Card className="lg:col-span-2">
+        {on.events.enabled && <Card className="lg:col-span-2">
           <div className="flex items-center justify-between"><CardTitle as="h2">Upcoming events</CardTitle><Link href="/app/events" className="text-sm font-semibold text-accent-text hover:underline">All events</Link></div>
           {events.length === 0 ? <p className="mt-4 text-sm text-muted">No upcoming events yet.</p> : (
             <ul className="mt-4 divide-y divide-line">
@@ -111,9 +114,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               ))}
             </ul>
           )}
-        </Card>
+        </Card>}
 
-        <Card className="lg:col-span-3">
+        {on.announcements.enabled && <Card className="lg:col-span-3">
           <div className="flex items-center justify-between"><CardTitle as="h2">Announcements</CardTitle><Link href="/app/announcements" className="text-sm font-semibold text-accent-text hover:underline">All announcements</Link></div>
           {announcements.length === 0 ? <p className="mt-4 text-sm text-muted">No announcements from your class leaders yet.</p> : (
             <ul className="mt-4 grid gap-4 md:grid-cols-3">
@@ -126,7 +129,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               ))}
             </ul>
           )}
-        </Card>
+        </Card>}
       </div>
     </>
   );

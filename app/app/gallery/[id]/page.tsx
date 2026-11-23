@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requireFeature } from "@/lib/features";
 import { ReportButton } from "@/components/app/report-button";
 import { Card } from "@/components/ui/card";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
@@ -14,6 +15,7 @@ import { getActiveCommunity } from "@/lib/session";
 export const metadata = { title: "Album" };
 
 export default async function Album({ params }: { params: Promise<{ id: string }> }) {
+  await requireFeature("gallery");
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const supabase = await createClient();

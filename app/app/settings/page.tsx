@@ -32,6 +32,10 @@ export default async function Settings() {
             <Field label="New password" htmlFor="password" hint="At least 10 characters."><Input id="password" name="password" type="password" autoComplete="new-password" minLength={10} required /></Field>
             <div><SubmitButton variant="secondary">Change password</SubmitButton></div>
           </ActionForm>
+          <h2 className="mt-8 font-bold">Your data</h2>
+          <p className="mt-1 text-sm text-muted">Download everything ALUMS holds about you (profile, classes, requests, connections, listings, RSVPs, dues and notifications) as a JSON file.</p>
+          {/* Plain link: the route streams a file download. */}
+          <a href="/app/settings/export" download className="mt-3 inline-flex h-9 items-center rounded-full border border-line px-3.5 text-sm font-semibold hover:bg-surface-2">Download my data</a>
         </Card>
         <Card>
           <h2 className="font-bold">Appearance</h2>

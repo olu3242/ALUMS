@@ -7,7 +7,7 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 |---|---|
 | Vercel | Git-linked to `olu3242/ALUMS`. `main` deploys to production and PRs get preview deployments. Production is public (Vercel Authentication turned off for production by decision); member data is protected in-app. |
 | Vercel env | `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). There is no service-role key anywhere. |
-| Supabase schema | Migrations `0100`–`0770` applied. `pg_cron` job `alums-automations` runs every 15 minutes. Migration history matches `supabase/migrations/` file versions exactly. |
+| Supabase schema | Migrations `0100`–`0780` applied. `pg_cron` job `alums-automations` runs every 15 minutes. Migration history matches `supabase/migrations/` file versions exactly. |
 | Supabase data | Founding class seed. Institution directory: 10,277 entries across 201 countries, including 139 Nigerian. |
 | Supabase Auth | Email confirmation on. TOTP MFA on. Site URL `https://alums-one.vercel.app`. Redirect URLs: prod domain and `http://localhost:3000/**`. Minimum password length 10. |
 | Integrations | GitHub Actions CI (`verify`) and Supabase Preview check, both required to be green before merging. |
@@ -30,13 +30,14 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 | Platform CRED (institution/community edit + safe delete, MFA, rank limits, member removal reversible, account list/suspend platform-only, sessions revoked, audit) | `97_platform_crud` (27) | **PASS** |
 | Class editing via institution lookup (official directory name, unverified creation by platform admins only, reuse/no duplicates, detach, institution admins can't move classes) | `98_edit_community_lookup` (12) | **PASS** |
 | Class modules on/off (default on, MFA, platform locks, class isolation, no direct writes), invitation list/revoke, admin feature summary (real counts, admin-only) | `99_features_invitations` (21) | **PASS** |
-| Validation, redirect safety, error mapping, RBAC TS↔SQL parity, workflow definitions↔SQL parity, handler coverage for every step, runtime waiting/denied/gates, brand contrast, money parsing | Vitest (40) | **PASS** |
+| Feature switches enforced in the DB (inserts refused while off, existing rows manageable, isolation), member data export (own rows only, audited) | `9a_platform_hardening` (12) | **PASS** |
+| Validation, redirect safety, error mapping, RBAC TS↔SQL parity, workflow definitions↔SQL parity, handler coverage for every step, runtime waiting/denied/gates, brand contrast, money parsing, site URL resolution, breached-password check | Vitest (47) | **PASS** |
 | Production automation cycle: all 7 jobs | `private.run_all_automations()` | **PASS** (all succeeded) |
 | Responsive + WCAG 2.2 AA (axe), light/dark, public pages incl. `/join/[code]`, open lookup listbox + keyboard, feature carousel with motion on | `scripts/ui-smoke.mjs` (52) | **PASS** (local, against the live DB) |
 | CI on Postgres 17, `tsc`, `next build`, Supabase Preview | GitHub checks | **PASS** |
 | Production: routes, 404s, auth guards, security headers, live DB data | HTTP probes | **PASS** |
 | Production: sign-in rejects bad credentials | Playwright | **PASS** |
-| Supabase security advisor | `/advisors/security` | **PASS with 1 open item.** Lint 0029 (signed-in users can call SECURITY DEFINER RPCs) is intended: each RPC authorizes internally. **Open:** leaked-password protection is off (Auth setting; turn it on in Supabase → Authentication). |
+| Supabase security advisor | `/advisors/security` | **PASS with 1 open item.** Lint 0029 (signed-in users can call SECURITY DEFINER RPCs) is intended: each RPC authorizes internally. Leaked-password protection (Supabase) needs the Pro plan; the app now checks Have I Been Pwned itself on sign-up and password change (`lib/password.ts`, fails open). |
 | Signup → confirm email → apply → approve; password reset; TOTP enrolment (production) | — | **NOT RUN**: creates real users and sends real email; waiting on custom SMTP and a test inbox |
 | Signed-in pages against live data (incl. admin Accounts/Content and edit/delete forms, axe on admin pages); storage uploads and signed URLs | — | **NOT RUN**: needs a confirmed test account |
 | Lint | — | **NOT RUN** (ESLint not configured; strict `tsc` only) |
@@ -55,6 +56,8 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 | Billing protection | N/A: no payments in the MVP |
 
 ## Launch blockers
+See `docs/GAP_ANALYSIS.md` for the full current → future state gap register and rollout order.
+
 1. **Email:** custom SMTP is configured (Gmail), but Gmail rejects the saved app password with `535 BadCredentials`, so no email can be sent. Fix the app password; branded templates and a 30/hour limit are already in place.
 2. **First admins:** two founders sign up, then run `supabase/ops/bootstrap-super-admin.sql`. Independent approvals need two platform-level people.
 3. **Legal:** privacy policy and terms (the footer says they're pending, with no dead links).
@@ -109,7 +112,6 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 - Higher-resolution landing imagery: the two AI-generated illustrations ship at their supplied sizes (549×310 and 441×549) and are labelled as AI-generated. Replace them with larger exports for sharper retina display.
 
 ## Debt and MVP shortcuts
-- Class modules switched off are hidden in the member portal and their pages redirect; RLS does not yet block writes to an off module's tables.
 - Membership and business approvals don't require AAL2.
 - Supabase types are handwritten.
 - Directory masking runs per row; revisit at around 10k members per scope.

@@ -6,17 +6,34 @@ import { Checkbox, Field, Input } from "@/components/ui/form";
 import { ButtonLink } from "@/components/ui/button";
 import { getPermissions, requireCommunity } from "@/lib/session";
 import { saveCommunityHeader } from "@/lib/actions/community";
+import { editCommunity } from "@/lib/actions/admin";
 
 export const metadata = { title: "Edit dashboard header" };
 
 export default async function EditHeader() {
   const community = await requireCommunity();
-  if (!(await getPermissions("community", community.id)).has("community.manage")) redirect("/app/dashboard");
+  const perms = await getPermissions("community", community.id);
+  if (!perms.has("community.manage")) redirect("/app/dashboard");
+  const canEditIdentity = perms.has("community.create"); // platform or institution admins (re-checked by edit_community)
   return (
     <>
       <PageHeader eyebrow={community.name} title="Dashboard header" description="Shown to verified members at the top of the class dashboard. Changes are audited."
         actions={<ButtonLink href="/app/dashboard" variant="secondary">Back to dashboard</ButtonLink>} />
+      {canEditIdentity && (
+        <Card className="mb-6 max-w-2xl">
+          <h2 className="text-lg font-bold">Class details</h2>
+          <p className="text-sm text-muted">The heading and the line under it. Changes need a verified authenticator code and are audited; the web address stays the same.</p>
+          <ActionForm action={editCommunity} className="mt-4 grid gap-4 sm:grid-cols-2">
+            <input type="hidden" name="id" value={community.id} />
+            <Field label="Class name" htmlFor="name" className="sm:col-span-2"><Input id="name" name="name" required minLength={2} maxLength={160} defaultValue={community.name} /></Field>
+            <Field label="Department" htmlFor="department_name"><Input id="department_name" name="department_name" required minLength={2} maxLength={120} defaultValue={community.department_name} /></Field>
+            <Field label="Graduation year" htmlFor="graduation_year"><Input id="graduation_year" name="graduation_year" type="number" required min={1900} max={2100} defaultValue={community.graduation_year} /></Field>
+            <div><SubmitButton>Save class details</SubmitButton></div>
+          </ActionForm>
+        </Card>
+      )}
       <Card className="max-w-2xl">
+        <h2 className="mb-4 text-lg font-bold">Tagline and cover photo</h2>
         <ActionForm action={saveCommunityHeader} className="grid gap-5" encType="multipart/form-data">
           <input type="hidden" name="community_id" value={community.id} />
           <Field label="Tagline" htmlFor="tagline" hint="Up to 160 characters, e.g. “Twenty years since we walked the hall.” Leave empty to hide.">

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { ADMIN_SCOPE_COOKIE, getAdminContext, requireAdmin } from "@/lib/session";
+import { ADMIN_SCOPE_COOKIE, getAdminContext, requireAdmin, requireUser } from "@/lib/session";
 import { assignRoleSchema, confirmDelete, createCommunitySchema, editCommunitySchema, editInstitutionSchema, fieldErrors, institutionSchema, reasonSchema } from "@/lib/validation";
 import { friendlyError, type ActionState } from "@/lib/errors";
 import { env } from "@/lib/env";
@@ -180,7 +180,7 @@ export async function deleteInstitution(_: ActionState, form: FormData): Promise
 }
 
 export async function editCommunity(_: ActionState, form: FormData): Promise<ActionState> {
-  await requireAdmin("community.create");
+  await requireUser(); // also used from the class dashboard; edit_community authorizes against the class itself
   const p = editCommunitySchema.safeParse(Object.fromEntries(form));
   if (!p.success) return { fieldErrors: fieldErrors(p.error) };
   const d = p.data;
@@ -188,7 +188,9 @@ export async function editCommunity(_: ActionState, form: FormData): Promise<Act
     p_community_id: d.id, p_name: d.name, p_department_name: d.department_name, p_graduation_year: d.graduation_year,
     p_institution_id: d.institution && d.institution !== "none" ? d.institution : null, p_change_institution: d.institution !== "",
   });
-  return error ? { error: friendlyError(error) } : done("Community updated.");
+  if (error) return { error: friendlyError(error) };
+  revalidatePath("/app", "layout");
+  return done("Community updated.");
 }
 
 export async function deleteCommunity(_: ActionState, form: FormData): Promise<ActionState> {

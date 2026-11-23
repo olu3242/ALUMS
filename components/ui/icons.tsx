@@ -21,6 +21,7 @@ const P: Record<string, React.ReactNode> = {
   scroll: <><path d="M8 3h11v15a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-1h11v1a3 3 0 0 0 3 3" /><path d="M8 3a3 3 0 0 0-3 3v11M11 8h5M11 12h5" /></>,
   flag: <><path d="M4 21V4M4 4h12l-2 4 2 4H4" /></>,
   building: <><path d="M4 21V5l8-3 8 3v16" /><path d="M9 21v-5h6v5M8 9h.01M12 9h.01M16 9h.01M8 13h.01M12 13h.01M16 13h.01" /></>,
+  pencil: <><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z" /><path d="m13.5 6.5 4 4" /></>,
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
   logout: <><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l-5-5 5-5M5 12h12" /></>,
 };

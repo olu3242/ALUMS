@@ -51,6 +51,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     <>
       {notice === "no-admin" && <div className="mb-6"><Notice tone="warning">You don't have an admin role in any scope.</Notice></div>}
       <BrandHero branding={community.institutions?.status === "verified" ? { ...community.institutions } : null} className="mb-8 rounded-3xl p-7 sm:p-10" coverUrl={cover?.data?.signedUrl ?? null}>
+        {canEditHeader && (
+          <Link href="/app/dashboard/header" aria-label={`Edit ${community.name} header`}
+            className="absolute right-0 top-0 z-10 inline-flex items-center gap-1.5 rounded-full border border-current/30 bg-black/20 px-3 py-1.5 text-sm font-semibold transition hover:bg-black/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:-right-2 sm:-top-2">
+            <Icon name="pencil" className="h-4 w-4" />Edit
+          </Link>
+        )}
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           {community.institutions?.status === "verified" && (
             <InstitutionLogo b={{ name: community.institutions.name, logo_path: community.institutions.logo_path ?? null, logo_format: community.institutions.logo_format ?? "mark" }} />
@@ -65,7 +71,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <div className="mt-6 flex flex-wrap gap-2">
           <ButtonLink href="/app/alumni" size="sm" className="bg-orange-strong text-white">Browse classmates</ButtonLink>
           <ButtonLink href="/app/dues" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Dues</ButtonLink>
-          {canEditHeader && <ButtonLink href="/app/dashboard/header" size="sm" className="border border-current/40 bg-transparent text-current hover:bg-white/10">Edit header</ButtonLink>}
+
         </div>
       </BrandHero>
 

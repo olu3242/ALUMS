@@ -7,7 +7,7 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 |---|---|
 | Vercel | Git-linked to `olu3242/ALUMS`. `main` deploys to production and PRs get preview deployments. Production is public (Vercel Authentication turned off for production by decision); member data is protected in-app. |
 | Vercel env | `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). There is no service-role key anywhere. |
-| Supabase schema | Migrations `0100`–`0730` applied. `pg_cron` job `alums-automations` runs every 15 minutes. Migration history matches `supabase/migrations/` file versions exactly. |
+| Supabase schema | Migrations `0100`–`0740` applied. `pg_cron` job `alums-automations` runs every 15 minutes. Migration history matches `supabase/migrations/` file versions exactly. |
 | Supabase data | Founding class seed. Institution directory: 10,277 entries across 201 countries, including 139 Nigerian. |
 | Supabase Auth | Email confirmation on. TOTP MFA on. Site URL `https://alums-one.vercel.app`. Redirect URLs: prod domain and `http://localhost:3000/**`. Minimum password length 10. |
 | Integrations | GitHub Actions CI (`verify`) and Supabase Preview check, both required to be green before merging. |
@@ -27,6 +27,7 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 | Affiliations (independent MFA approval, governance granted/withdrawn, duplicate-class guard, either side can end) and invitation codes (permissions, auto-verify vs review, single-use, expiry, revocation, brute-force throttling) | `90_affiliations_invites` (37) | **PASS** |
 | Workflow OS (A–E advance from real activity, gates wait, actors recorded, visibility) and scheduled automations (exactly-once reminders, paid members skipped, failure isolation, on-demand runs) | `95_workflows_automations` (28) | **PASS** |
 | Class dashboard header (community.manage only, own-class cover folder, object must exist, audited, anon can't read cover path) | `96_community_header` (11) | **PASS** |
+| Platform CRED (institution/community edit + safe delete, MFA, rank limits, member removal reversible, account list/suspend platform-only, sessions revoked, audit) | `97_platform_crud` (27) | **PASS** |
 | Validation, redirect safety, error mapping, RBAC TS↔SQL parity, workflow definitions↔SQL parity, handler coverage for every step, runtime waiting/denied/gates, brand contrast, money parsing | Vitest (40) | **PASS** |
 | Production automation cycle: all 7 jobs | `private.run_all_automations()` | **PASS** (all succeeded) |
 | Responsive + WCAG 2.2 AA (axe), light/dark, public pages incl. `/join/[code]`, open lookup listbox + keyboard, feature carousel with motion on | `scripts/ui-smoke.mjs` (52) | **PASS** (local, against the live DB) |
@@ -35,7 +36,7 @@ _Verdict: **LIVE FOR PILOT, NOT READY FOR PUBLIC LAUNCH.** Signed-in journeys ha
 | Production: sign-in rejects bad credentials | Playwright | **PASS** |
 | Supabase security advisor | `/advisors/security` | **PASS with 1 open item.** Lint 0029 (signed-in users can call SECURITY DEFINER RPCs) is intended: each RPC authorizes internally. **Open:** leaked-password protection is off (Auth setting; turn it on in Supabase → Authentication). |
 | Signup → confirm email → apply → approve; password reset; TOTP enrolment (production) | — | **NOT RUN**: creates real users and sends real email; waiting on custom SMTP and a test inbox |
-| Signed-in pages against live data; storage uploads and signed URLs | — | **NOT RUN**: needs a confirmed test account |
+| Signed-in pages against live data (incl. admin Accounts/Content and edit/delete forms, axe on admin pages); storage uploads and signed URLs | — | **NOT RUN**: needs a confirmed test account |
 | Lint | — | **NOT RUN** (ESLint not configured; strict `tsc` only) |
 | Load / performance | — | **NOT RUN** |
 

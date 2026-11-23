@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { ADMIN_SCOPE_COOKIE, getAdminContext, requireAdmin } from "@/lib/session";
-import { assignRoleSchema, createCommunitySchema, fieldErrors, institutionSchema } from "@/lib/validation";
+import { assignRoleSchema, confirmDelete, createCommunitySchema, editCommunitySchema, editInstitutionSchema, fieldErrors, institutionSchema, reasonSchema } from "@/lib/validation";
 import { friendlyError, type ActionState } from "@/lib/errors";
 import { env } from "@/lib/env";
 
@@ -157,4 +157,87 @@ export async function runAutomationsNow(_: ActionState, form: FormData): Promise
   const rows = (data as { job_key: string; status: string; processed: number }[] | null) ?? [];
   revalidatePath("/admin/automations");
   return { ok: true, message: rows.map((r) => `${r.job_key}: ${r.status} (${r.processed})`).join(" · ") || "Ran." };
+}
+
+// Platform CRED ----------------------------------------------------------------
+// Safe delete: Postgres refuses when anything depends on the record (archive/suspend instead). All need MFA + are audited.
+export async function updateInstitution(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin("institution.manage");
+  const p = editInstitutionSchema.safeParse(Object.fromEntries(form));
+  if (!p.success) return { fieldErrors: fieldErrors(p.error) };
+  const { error } = await (await createClient()).rpc("update_institution", {
+    p_institution_id: p.data.id, p_name: p.data.name, p_country: p.data.country, p_city: p.data.city, p_website_url: p.data.website_url,
+  });
+  return error ? { error: friendlyError(error) } : done("Institution updated.");
+}
+
+export async function deleteInstitution(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin("institution.manage");
+  const p = confirmDelete.safeParse(Object.fromEntries(form));
+  if (!p.success) return { fieldErrors: fieldErrors(p.error) };
+  const { error } = await (await createClient()).rpc("delete_institution", { p_institution_id: p.data.id });
+  return error ? { error: friendlyError(error) } : done("Institution deleted.");
+}
+
+export async function editCommunity(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin("community.create");
+  const p = editCommunitySchema.safeParse(Object.fromEntries(form));
+  if (!p.success) return { fieldErrors: fieldErrors(p.error) };
+  const d = p.data;
+  const { error } = await (await createClient()).rpc("edit_community", {
+    p_community_id: d.id, p_name: d.name, p_department_name: d.department_name, p_graduation_year: d.graduation_year,
+    p_institution_id: d.institution && d.institution !== "none" ? d.institution : null, p_change_institution: d.institution !== "",
+  });
+  return error ? { error: friendlyError(error) } : done("Community updated.");
+}
+
+export async function deleteCommunity(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin("community.create");
+  const p = confirmDelete.safeParse(Object.fromEntries(form));
+  if (!p.success) return { fieldErrors: fieldErrors(p.error) };
+  const { error } = await (await createClient()).rpc("delete_community", { p_community_id: p.data.id });
+  return error ? { error: friendlyError(error) } : done("Community deleted.");
+}
+
+export async function removeMember(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin("member.suspend");
+  const p = reasonSchema.safeParse(Object.fromEntries(form));
+  if (!p.success) return { fieldErrors: fieldErrors(p.error) };
+  const { error } = await (await createClient()).rpc("remove_member", { p_membership_id: p.data.id, p_reason: p.data.reason });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath("/admin/members");
+  return { ok: true, message: "Member removed. Reinstate them any time from this list." };
+}
+
+export async function setAccountStatus(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin("member.suspend");
+  const suspend = form.get("suspend") === "true";
+  const id = uuid.safeParse(form.get("id"));
+  if (!id.success) return { error: "Invalid account." };
+  const reason = z.string().trim().max(500).optional().parse(form.get("reason") || undefined) ?? null;
+  const { error } = await (await createClient()).rpc("set_account_status", { p_user_id: id.data, p_suspended: suspend, p_reason: reason });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath("/admin/accounts");
+  return { ok: true, message: suspend ? "Account suspended and signed out everywhere." : "Account reinstated." };
+}
+
+/** Content moderation across a class. Row-level security decides what this admin may change; triggers/RPCs audit it. */
+export async function moderateContent(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const id = uuid.parse(form.get("id"));
+  const op = z.enum(["event.cancel", "event.publish", "event.delete", "announcement.delete", "business.suspend", "business.approve", "business.reject",
+    "media.hide", "media.show"]).parse(form.get("op"));
+  const supabase = await createClient();
+  const [kind, verb] = op.split(".") as [string, string];
+  let res: { error: { code?: string; message: string } | null; count?: number | null };
+  if (kind === "event" && verb === "delete") res = await supabase.from("events").delete({ count: "exact" }).eq("id", id).eq("status", "draft");
+  else if (kind === "event") res = await supabase.from("events").update({ status: verb === "cancel" ? "cancelled" : "published" }, { count: "exact" }).eq("id", id);
+  else if (kind === "announcement") res = await supabase.from("announcements").delete({ count: "exact" }).eq("id", id);
+  else if (kind === "media") res = await supabase.from("media_assets").update({ status: verb === "hide" ? "hidden" : "published" }, { count: "exact" }).eq("id", id);
+  else res = await supabase.rpc("review_business", { p_business_id: id, p_decision: verb, p_note: note(form) });
+  if (res.error) return { error: friendlyError(res.error) };
+  if (res.count === 0) return { error: "Nothing changed. You may not have permission, or it was already changed." };
+  revalidatePath("/admin/content");
+  revalidatePath("/app", "layout");
+  return { ok: true, message: "Done." };
 }

@@ -145,6 +145,19 @@ export const institutionSchema = z.object({
   verified: z.coerce.boolean().default(false),
 });
 
+export const editInstitutionSchema = z.object({
+  id: z.string().uuid(), name: trimmed(2, 200), country: optionalText(80), city: optionalText(80), website_url: optionalUrl,
+});
+export const editCommunitySchema = z.object({
+  id: z.string().uuid(), name: trimmed(2, 160), department_name: trimmed(2, 120),
+  graduation_year: z.coerce.number().int().min(1900).max(2100),
+  // "" = keep as is, "none" = detach, uuid = move (platform admins only; enforced in Postgres)
+  institution: z.union([z.literal(""), z.literal("none"), z.string().uuid()]).default(""),
+});
+/** Destructive actions need an explicit confirmation tick. */
+export const confirmDelete = z.object({ id: z.string().uuid(), confirm: z.literal("on", { errorMap: () => ({ message: "Tick to confirm" }) }) });
+export const reasonSchema = z.object({ id: z.string().uuid(), reason: trimmed(3, 500) });
+
 /** Flatten Zod issues for ActionState. */
 export const fieldErrors = (e: z.ZodError) => e.flatten().fieldErrors as Record<string, string[]>;
 

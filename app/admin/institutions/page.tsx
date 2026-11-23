@@ -5,7 +5,8 @@ import { ActionForm, SubmitButton } from "@/components/ui/action-form";
 import { Checkbox, Field, Input, Select } from "@/components/ui/form";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
-import { createInstitution, setInstitutionStatus } from "@/lib/actions/admin";
+import { createInstitution, deleteInstitution, setInstitutionStatus, updateInstitution } from "@/lib/actions/admin";
+import { DeleteForm } from "@/components/app/delete-form";
 import { InstitutionLookup } from "@/components/site/institution-lookup";
 import { getDirectoryCountries } from "@/lib/queries/public";
 
@@ -31,6 +32,19 @@ export default async function Institutions() {
                 <Select id={`is-${i.id}`} name="status" defaultValue={i.status} className="h-9 text-sm"><option value="unverified">Unverified</option><option value="verified">Verified</option><option value="archived">Archived</option></Select>
                 <SubmitButton size="sm" variant="secondary">Save</SubmitButton>
               </ActionForm>
+              <details className="w-full">
+                <summary className="cursor-pointer text-sm font-semibold text-accent-text">Edit or delete</summary>
+                <ActionForm action={updateInstitution} className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <input type="hidden" name="id" value={i.id} />
+                  <Field label="Name" htmlFor={`in-${i.id}`} className="sm:col-span-2" hint="Renaming unlinks the worldwide-directory entry."><Input id={`in-${i.id}`} name="name" required minLength={2} maxLength={200} defaultValue={i.name} /></Field>
+                  <Field label="Country" htmlFor={`ic-${i.id}`}><Input id={`ic-${i.id}`} name="country" maxLength={80} defaultValue={i.country ?? ""} /></Field>
+                  <Field label="City" htmlFor={`iy-${i.id}`}><Input id={`iy-${i.id}`} name="city" maxLength={80} defaultValue={i.city ?? ""} /></Field>
+                  <Field label="Website" htmlFor={`iw-${i.id}`} className="sm:col-span-2"><Input id={`iw-${i.id}`} name="website_url" type="url" placeholder="https://" defaultValue={i.website_url ?? ""} /></Field>
+                  <div><SubmitButton size="sm">Save details</SubmitButton></div>
+                </ActionForm>
+                <div className="mt-4"><DeleteForm action={deleteInstitution} id={i.id} label="Delete institution"
+                  hint="Only possible when no classes, affiliations, posts or admins use it. Otherwise set it to Archived." /></div>
+              </details>
             </Card></li>
           ))}
         </ul>

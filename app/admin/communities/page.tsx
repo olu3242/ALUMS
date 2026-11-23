@@ -7,7 +7,9 @@ import { ActionForm, SubmitButton } from "@/components/ui/action-form";
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/ui/form";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
-import { createCommunity, deleteCommunity, editCommunity, resolveCommunityRequest, updateCommunity } from "@/lib/actions/admin";
+import { createCommunity, deleteCommunity, resolveCommunityRequest, updateCommunity } from "@/lib/actions/admin";
+import { ClassDetailsForm } from "@/components/app/class-details-form";
+import { getDirectoryCountries } from "@/lib/queries/public";
 import { DeleteForm } from "@/components/app/delete-form";
 import { formatDate } from "@/lib/utils";
 
@@ -19,6 +21,7 @@ export default async function Communities({ searchParams }: { searchParams: Prom
   const supabase = await createClient();
   const canCreate = ctx.permissions.has("community.create");
   const isPlatform = ctx.current.scope_type === "platform";
+  const countries = canCreate ? await getDirectoryCountries() : [];
   const [{ data: institutions }, { data: requests }] = await Promise.all([
     canCreate ? supabase.from("institutions").select("id, name, status").neq("status", "archived").order("name") : Promise.resolve({ data: [] }),
     canCreate && ctx.current.scope_type === "platform"
@@ -64,20 +67,8 @@ export default async function Communities({ searchParams }: { searchParams: Prom
               {canCreate && (
                 <details className="mt-4">
                   <summary className="cursor-pointer text-sm font-semibold text-accent-text">Edit details{isPlatform ? " or delete" : ""}</summary>
-                  <ActionForm action={editCommunity} className="mt-3 grid gap-3 sm:grid-cols-2">
-                    <input type="hidden" name="id" value={c.id} />
-                    <Field label="Name" htmlFor={`cn-${c.id}`} className="sm:col-span-2"><Input id={`cn-${c.id}`} name="name" required minLength={2} maxLength={160} defaultValue={c.name} /></Field>
-                    <Field label="Department" htmlFor={`cd-${c.id}`}><Input id={`cd-${c.id}`} name="department_name" required minLength={2} maxLength={120} defaultValue={c.department_name} /></Field>
-                    <Field label="Graduation year" htmlFor={`cy-${c.id}`}><Input id={`cy-${c.id}`} name="graduation_year" type="number" required min={1900} max={2100} defaultValue={c.graduation_year} /></Field>
-                    {isPlatform && (
-                      <Field label="Institution" htmlFor={`ci-${c.id}`} className="sm:col-span-2" hint="Moving a class requires ending any institution affiliation first.">
-                        <Select id={`ci-${c.id}`} name="institution" defaultValue=""><option value="">Keep current</option><option value="none">No institution (pending)</option>
-                          {(institutions ?? []).filter((i) => i.id !== c.institution_id).map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}</Select>
-                      </Field>
-                    )}
-                    <p className="text-xs text-muted sm:col-span-2">The web address (/community/{c.slug}) stays the same so links and invitations keep working.</p>
-                    <div><SubmitButton size="sm">Save details</SubmitButton></div>
-                  </ActionForm>
+                  <div className="mt-3"><ClassDetailsForm c={c} institutionName={c.institution_name} canChangeInstitution={isPlatform}
+                    countries={countries} idPrefix="ac" /></div>
                   {isPlatform && <div className="mt-4"><DeleteForm action={deleteCommunity} id={c.id} label="Delete community"
                     hint="Only possible for an empty class with no members, requests, payments or content. Otherwise archive it." /></div>}
                 </details>

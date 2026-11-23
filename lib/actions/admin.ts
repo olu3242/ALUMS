@@ -184,9 +184,12 @@ export async function editCommunity(_: ActionState, form: FormData): Promise<Act
   const p = editCommunitySchema.safeParse(Object.fromEntries(form));
   if (!p.success) return { fieldErrors: fieldErrors(p.error) };
   const d = p.data;
+  const lookup = d.institution_lookup === "1";
   const { error } = await (await createClient()).rpc("edit_community", {
     p_community_id: d.id, p_name: d.name, p_department_name: d.department_name, p_graduation_year: d.graduation_year,
-    p_institution_id: d.institution && d.institution !== "none" ? d.institution : null, p_change_institution: d.institution !== "",
+    ...(lookup
+      ? { p_institution_id: null, p_change_institution: true, p_institution_name: d.institution_name ?? "", p_directory_id: d.directory_id ?? null }
+      : { p_institution_id: d.institution && d.institution !== "none" ? d.institution : null, p_change_institution: d.institution !== "" }),
   });
   if (error) return { error: friendlyError(error) };
   revalidatePath("/app", "layout");

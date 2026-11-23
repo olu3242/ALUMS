@@ -6,7 +6,8 @@ import { Checkbox, Field, Input } from "@/components/ui/form";
 import { ButtonLink } from "@/components/ui/button";
 import { getPermissions, requireCommunity } from "@/lib/session";
 import { saveCommunityHeader } from "@/lib/actions/community";
-import { editCommunity } from "@/lib/actions/admin";
+import { ClassDetailsForm } from "@/components/app/class-details-form";
+import { getDirectoryCountries } from "@/lib/queries/public";
 
 export const metadata = { title: "Edit dashboard header" };
 
@@ -22,14 +23,9 @@ export default async function EditHeader() {
       {canEditIdentity && (
         <Card className="mb-6 max-w-2xl">
           <h2 className="text-lg font-bold">Class details</h2>
-          <p className="text-sm text-muted">The heading and the line under it. Changes need a verified authenticator code and are audited; the web address stays the same.</p>
-          <ActionForm action={editCommunity} className="mt-4 grid gap-4 sm:grid-cols-2">
-            <input type="hidden" name="id" value={community.id} />
-            <Field label="Class name" htmlFor="name" className="sm:col-span-2"><Input id="name" name="name" required minLength={2} maxLength={160} defaultValue={community.name} /></Field>
-            <Field label="Department" htmlFor="department_name"><Input id="department_name" name="department_name" required minLength={2} maxLength={120} defaultValue={community.department_name} /></Field>
-            <Field label="Graduation year" htmlFor="graduation_year"><Input id="graduation_year" name="graduation_year" type="number" required min={1900} max={2100} defaultValue={community.graduation_year} /></Field>
-            <div><SubmitButton>Save class details</SubmitButton></div>
-          </ActionForm>
+          <p className="text-sm text-muted">The heading and the line under it, in the same order members search: institution, department, then graduation year.</p>
+          <div className="mt-4"><ClassDetailsForm c={community} institutionName={community.institutions?.name ?? null}
+            canChangeInstitution={perms.has("institution.manage")} countries={await getDirectoryCountries()} /></div>
         </Card>
       )}
       <Card className="max-w-2xl">

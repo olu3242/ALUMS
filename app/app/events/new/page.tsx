@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { requireFeature } from "@/lib/features";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/misc";
 import { EventForm } from "@/components/app/event-form";
@@ -7,6 +8,7 @@ import { communityPermissions } from "@/lib/queries/member";
 
 export const metadata = { title: "Create event" };
 export default async function NewEvent() {
+  await requireFeature("events");
   const community = await requireCommunity();
   if (!(await communityPermissions(community.id)).has("event.create")) redirect("/app/events");
   return (

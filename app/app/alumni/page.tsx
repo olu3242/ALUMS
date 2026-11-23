@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireFeature } from "@/lib/features";
 import { Avatar, EmptyState, PageHeader } from "@/components/ui/misc";
 import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/form";
@@ -17,6 +18,7 @@ const PAGE = 24;
 const str = (v: unknown, max = 100) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
 export default async function Alumni({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  await requireFeature("alumni");
   const sp = await searchParams;
   const community = await requireCommunity();
   const { activeMemberships } = await getViewer();

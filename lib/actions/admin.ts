@@ -246,3 +246,31 @@ export async function moderateContent(_: ActionState, form: FormData): Promise<A
   revalidatePath("/app", "layout");
   return { ok: true, message: "Done." };
 }
+
+/** Class modules on/off (and lock, for platform admins). set_community_feature authorizes, requires MFA and audits. */
+export async function setCommunityFeature(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireUser();
+  const p = z.object({
+    community_id: z.string().uuid(),
+    feature: z.enum(["alumni", "businesses", "locations", "events", "gallery", "announcements", "dues", "network"]),
+    enabled: z.enum(["true", "false"]).transform((v) => v === "true"),
+    locked: z.enum(["true", "false", ""]).optional().transform((v) => (v ? v === "true" : null)),
+  }).safeParse(Object.fromEntries(form));
+  if (!p.success) return { error: "Invalid request." };
+  const { error } = await (await createClient()).rpc("set_community_feature", {
+    p_community_id: p.data.community_id, p_feature: p.data.feature, p_enabled: p.data.enabled, p_locked: p.data.locked ?? null,
+  });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath("/app", "layout");
+  return done("Saved.");
+}
+
+export async function revokeInvitation(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireUser();
+  const id = uuid.safeParse(form.get("id"));
+  if (!id.success) return { error: "Invalid invitation." };
+  const { error } = await (await createClient()).rpc("revoke_invitation", { p_invitation_id: id.data });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath("/admin/members");
+  return { ok: true, message: "Invitation revoked." };
+}

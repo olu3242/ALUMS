@@ -13,7 +13,7 @@ export const metadata = { title: "Moderation" };
 
 export default async function Moderation() {
   const ctx = await requireAdmin("moderation.resolve");
-  if (ctx.current.scope_type !== "community") return <><PageHeader title="Moderation" /><NeedsCommunity /></>;
+  if (ctx.current.scope_type !== "community") return <><PageHeader title="Moderation" /><NeedsCommunity next="/admin/moderation" /></>;
   const { data } = await (await createClient()).from("moderation_reports").select("id, target_type, target_id, reason, status, created_at, resolution_note")
     .eq("community_id", ctx.current.scope_id!).order("status").order("created_at", { ascending: false }).limit(100);
   const rows = data ?? [];

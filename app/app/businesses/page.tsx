@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireFeature } from "@/lib/features";
 import { ReportButton } from "@/components/app/report-button";
 import { Card } from "@/components/ui/card";
 import { Badge, StatusBadge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ type Biz = { id: string; owner_id: string; name: string; description: string | n
   review_note: string | null; category_id: string | null; business_categories: { name: string; slug: string } | null };
 
 export default async function Businesses({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  await requireFeature("businesses");
   const sp = await searchParams;
   const community = await requireCommunity();
   const { user } = await getViewer();

@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { requireFeature } from "@/lib/features";
 import { EmptyState, Notice, PageHeader } from "@/components/ui/misc";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
@@ -16,6 +17,7 @@ type Pay = { id: string; plan_id: string; amount_minor: number; currency: string
   period_label: string | null; status: string; created_at: string; decision_note: string | null };
 
 export default async function Dues() {
+  await requireFeature("dues");
   const community = await requireCommunity();
   const { user } = await getViewer();
   const supabase = await createClient();

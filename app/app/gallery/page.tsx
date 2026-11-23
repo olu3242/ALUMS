@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireFeature } from "@/lib/features";
 import { Card } from "@/components/ui/card";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
@@ -13,6 +14,7 @@ import { formatDate } from "@/lib/utils";
 export const metadata = { title: "Gallery" };
 
 export default async function Gallery() {
+  await requireFeature("gallery");
   const community = await requireCommunity();
   const perms = await communityPermissions(community.id);
   const { data } = await (await createClient()).from("albums").select("id, title, description, created_at, media_assets(count)")

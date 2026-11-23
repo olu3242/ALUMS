@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireFeature } from "@/lib/features";
 import { BrandHero, InstitutionLogo } from "@/components/site/brand-hero";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState, Notice, PageHeader } from "@/components/ui/misc";
@@ -11,6 +12,7 @@ const KIND: Record<string, string> = { news: "News", opportunity: "Opportunity",
   partner: "Partner", association: "Alumni association", chapter: "Chapter", social: "Official channel", other: "Link" };
 
 export default async function Network() {
+  await requireFeature("network");
   const community = await requireCommunity();
   const inst = community.institutions?.status === "verified" ? community.institutions : null;
   if (!inst || !community.institution_id) {

@@ -37,7 +37,7 @@ export default async function Approvals() {
 
       <section aria-labelledby="mreq" className="mb-12">
         <h2 id="mreq" className="mb-4 text-lg font-bold">Membership requests</h2>
-        {!isCommunity ? <NeedsCommunity /> : requests.length === 0 ? <EmptyState title="No pending membership requests" /> : (
+        {!isCommunity ? <NeedsCommunity next="/admin/approvals" /> : requests.length === 0 ? <EmptyState title="No pending membership requests" /> : (
           <ul className="grid gap-4">
             {requests.map((r) => (
               <li key={r.id}><Card>
@@ -66,7 +66,7 @@ export default async function Approvals() {
 
       <section id="businesses" aria-labelledby="breq" className="mb-12 scroll-mt-20">
         <h2 id="breq" className="mb-4 text-lg font-bold">Business listings</h2>
-        {!isCommunity ? <NeedsCommunity /> : !ctx.permissions.has("business.review") ? <p className="text-sm text-muted">Not available for your role.</p>
+        {!isCommunity ? <NeedsCommunity next="/admin/approvals" /> : !ctx.permissions.has("business.review") ? <p className="text-sm text-muted">Not available for your role.</p>
           : businesses.length === 0 ? <EmptyState title="No listings awaiting review" /> : (
           <ul className="grid gap-4">
             {businesses.map((b) => (

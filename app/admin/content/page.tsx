@@ -45,7 +45,7 @@ function Section({ title, rows }: { title: string; rows: { id: string; label: st
 
 export default async function Content() {
   const ctx = await requireAdmin();
-  if (ctx.current.scope_type !== "community") return <><PageHeader title="Content" /><NeedsCommunity /></>;
+  if (ctx.current.scope_type !== "community") return <><PageHeader title="Content" /><NeedsCommunity next="/admin/content" /></>;
   const cid = ctx.current.scope_id!;
   const has = (p: string) => ctx.permissions.has(p);
   const supabase = await createClient();

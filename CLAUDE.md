@@ -15,7 +15,7 @@ Orange replaces Forest Green. Green only for verified/approved. Fonts: Manrope/P
 
 ## Routes
 Public: `/ /about /discover /class-of /sign-in /register /community/[slug] /institution/[slug] /join/[code]`
-Member: `/app/{dashboard,my-classes,profile,alumni,businesses,locations,events,gallery,announcements,dues,network,notifications,settings}`
+Member: `/app/{dashboard,dashboard/header,my-classes,profile,alumni,businesses,locations,events,gallery,announcements,dues,network,notifications,settings}`
 Admin: `/admin/{dashboard,members,communities,institutions,institution,roles,permissions,approvals,moderation,dues,automations,security,audit-logs,settings}`
 
 ## Security rules

@@ -161,6 +161,12 @@ export const brandingSchema = z.object({
   public_page: z.coerce.boolean().default(false),
 });
 export const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
+export const communityHeaderSchema = z.object({
+  community_id: z.string().uuid(),
+  tagline: optionalText(160),
+  remove_cover: z.coerce.boolean().default(false),
+});
+export const MAX_COVER_BYTES = 3 * 1024 * 1024;
 export const MAX_LOGO_BYTES = 1024 * 1024;
 
 export const institutionPostSchema = z.object({

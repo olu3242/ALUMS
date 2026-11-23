@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 type Factor = { id: string; friendly_name?: string; status: string };
 
 /** TOTP enrollment and step-up to AAL2 via Supabase Auth MFA. Privileged RPCs require AAL2. */
-export function MfaPanel() {
+export function MfaPanel({ next }: { next?: string } = {}) {
   const supabase = createClient();
   const router = useRouter();
   const [factors, setFactors] = useState<Factor[]>([]);
@@ -44,8 +44,9 @@ export function MfaPanel() {
     const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code });
     setBusy(false); setCode("");
     if (error) return setMsg({ tone: "error", text: "That code didn't work. Check your device clock and try again." });
-    setEnrolling(null); setMsg({ tone: "ok", text: "Verified. Privileged actions are unlocked for this session." });
-    await load(); router.refresh();
+    setEnrolling(null); setMsg({ tone: "ok", text: next ? "Verified. Taking you back…" : "Verified. Privileged actions are unlocked for this session." });
+    await load();
+    if (next) router.push(next); else router.refresh();
   }
 
   return (

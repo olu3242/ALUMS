@@ -49,7 +49,7 @@ describe("safety helpers", () => {
     expect(friendlyError({ code: "42501", message: "new row violates row-level security policy for table x" })).toBe("You don't have permission to do that.");
     expect(friendlyError({ code: "42501", message: "you cannot review your own request" })).toBe("You cannot review your own request");
     expect(friendlyError({ code: "XX000", message: "internal stack" })).toBe("Something went wrong. Please try again.");
-    expect(friendlyError({ code: "42501", message: "x", hint: "mfa_required" })).toMatch(/multi-factor/);
+    expect(friendlyError({ code: "42501", message: "x", hint: "mfa_required" })).toMatch(/authenticator/);
   });
 });
 

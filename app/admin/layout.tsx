@@ -1,5 +1,7 @@
 import { Shell, type NavItem } from "@/components/app/shell";
-import { BackendNotice } from "@/components/ui/misc";
+import Link from "next/link";
+import { BackendNotice, Notice } from "@/components/ui/misc";
+import { createClient } from "@/lib/supabase/server";
 import { isBackendConfigured } from "@/lib/env";
 import { getViewer, requireAdmin } from "@/lib/session";
 import { setAdminScope } from "@/lib/actions/admin";
@@ -30,6 +32,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isBackendConfigured()) return <main id="main" className="container py-16"><BackendNotice /></main>;
   const ctx = await requireAdmin();
   const { user, profile } = await getViewer();
+  const { data: aal } = await (await createClient()).auth.mfa.getAuthenticatorAssuranceLevel();
+  const needsMfa = aal?.currentLevel !== "aal2";
   const nav = [
     ...NAV.filter((n) => (!n.perm || ctx.permissions.has(n.perm)) && (!n.scopes || n.scopes.includes(ctx.current.scope_type))),
     { href: "/app/dashboard", label: "Back to member portal", icon: "arrow" as const },
@@ -52,6 +56,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </form>
       }>
+      {needsMfa && (
+        <div className="mb-6"><Notice tone="warning">
+          {aal?.nextLevel === "aal2" ? "This session isn't verified with your authenticator yet" : "You haven't set up an authenticator app yet"}, so edits, deletes, approvals and role changes are locked.{" "}
+          <Link href="/admin/security" className="font-semibold underline">{aal?.nextLevel === "aal2" ? "Verify now" : "Set it up"} →</Link>
+        </Notice></div>
+      )}
       {children}
     </Shell>
   );

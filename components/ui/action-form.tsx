@@ -1,7 +1,9 @@
 "use client";
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import type { ActionState } from "@/lib/errors";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { MFA_REQUIRED_MESSAGE, type ActionState } from "@/lib/errors";
 import { buttonClass, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -21,10 +23,14 @@ export function ActionForm({ action, children, className, resetOnSuccess = false
 }
 
 export function FormMessage({ state }: { state: ActionState }) {
+  const pathname = usePathname();
   const fe = state?.fieldErrors ? Object.entries(state.fieldErrors).filter(([, v]) => v?.length) : [];
   return (
     <div aria-live="polite" className="empty:hidden">
-      {state?.error && <p role="alert" className="mt-3 rounded-xl border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-sm text-danger">{state.error}</p>}
+      {state?.error && <p role="alert" className="mt-3 rounded-xl border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-sm text-danger">{state.error}
+        {state.error === MFA_REQUIRED_MESSAGE && (
+          <> <Link href={`/admin/security?next=${encodeURIComponent(pathname)}`} className="font-semibold underline">Verify now →</Link></>
+        )}</p>}
       {fe.length > 0 && (
         <ul className="mt-2 list-disc pl-5 text-sm text-danger">
           {fe.map(([k, v]) => <li key={k}><span className="font-semibold">{k.replace(/_/g, " ")}</span>: {v.join(", ")}</li>)}

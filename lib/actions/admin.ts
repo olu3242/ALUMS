@@ -274,3 +274,20 @@ export async function revokeInvitation(_: ActionState, form: FormData): Promise<
   revalidatePath("/admin/members");
   return { ok: true, message: "Invitation revoked." };
 }
+
+/** Edit an announcement (RLS: announcement.publish in its class; audited by announcements_audit trigger). */
+export async function updateAnnouncement(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireUser();
+  const p = z.object({
+    id: z.string().uuid(), title: z.string().trim().min(2).max(160), body: z.string().trim().min(1).max(10000),
+    is_pinned: z.literal("on").optional().transform(Boolean),
+  }).safeParse(Object.fromEntries(form));
+  if (!p.success) return { fieldErrors: fieldErrors(p.error) };
+  const { error, count } = await (await createClient()).from("announcements")
+    .update({ title: p.data.title, body: p.data.body, is_pinned: p.data.is_pinned }, { count: "exact" }).eq("id", p.data.id);
+  if (error) return { error: friendlyError(error) };
+  if (count === 0) return { error: "You don't have permission to edit this announcement." };
+  revalidatePath("/admin/content");
+  revalidatePath("/app", "layout");
+  return { ok: true, message: "Announcement updated." };
+}

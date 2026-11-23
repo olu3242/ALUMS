@@ -7,7 +7,7 @@ import { Field, Input } from "@/components/ui/form";
 import { NeedsCommunity } from "@/components/app/scope-note";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
-import { inviteMember, setMemberStatus } from "@/lib/actions/admin";
+import { inviteMember, removeMember, setMemberStatus } from "@/lib/actions/admin";
 import { createInviteCode, revokeInviteCode } from "@/lib/actions/network";
 import { Checkbox, Select } from "@/components/ui/form";
 import { env } from "@/lib/env";
@@ -98,6 +98,22 @@ export default async function Members() {
                     {canSuspend && r.status !== "left" && (
                       <form action={setMemberStatus}><input type="hidden" name="id" value={r.membership_id} /><input type="hidden" name="status" value={r.status === "active" ? "suspended" : "active"} />
                         <Button size="sm" variant={r.status === "active" ? "danger" : "secondary"}>{r.status === "active" ? "Suspend" : "Reinstate"}</Button></form>
+                    )}
+                    {canSuspend && r.status === "left" && (
+                      <form action={setMemberStatus}><input type="hidden" name="id" value={r.membership_id} /><input type="hidden" name="status" value="active" />
+                        <Button size="sm" variant="secondary">Reinstate</Button></form>
+                    )}
+                    {canSuspend && r.status !== "left" && (
+                      <details className="mt-2 text-left">
+                        <summary className="cursor-pointer text-xs font-semibold text-muted">Remove from class</summary>
+                        <ActionForm action={removeMember} className="mt-2 grid gap-2">
+                          <input type="hidden" name="id" value={r.membership_id} />
+                          <label htmlFor={`rm-${r.membership_id}`} className="sr-only">Reason</label>
+                          <input id={`rm-${r.membership_id}`} name="reason" required minLength={3} maxLength={500} placeholder="Reason (sent to the member)"
+                            className="h-9 rounded-lg border border-line bg-surface px-2 text-sm" />
+                          <SubmitButton size="sm" variant="danger">Remove</SubmitButton>
+                        </ActionForm>
+                      </details>
                     )}
                   </td>
                 </tr>

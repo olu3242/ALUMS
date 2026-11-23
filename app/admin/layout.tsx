@@ -11,6 +11,8 @@ const NAV: (NavItem & { perm?: string; scopes?: string[] })[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "home" },
   { href: "/admin/approvals", label: "Approvals", icon: "check" },
   { href: "/admin/members", label: "Members", icon: "users", perm: "member.view", scopes: ["community"] },
+  { href: "/admin/accounts", label: "Accounts", icon: "user", perm: "member.view", scopes: ["platform"] },
+  { href: "/admin/content", label: "Content", icon: "image", scopes: ["community"] },
   { href: "/admin/communities", label: "Communities", icon: "layers", perm: "community.view_admin" },
   { href: "/admin/institutions", label: "Institutions", icon: "building", perm: "institution.manage", scopes: ["platform"] },
   { href: "/admin/institution", label: "Institution brand & network", icon: "building", perm: "institution.brand", scopes: ["institution"] },

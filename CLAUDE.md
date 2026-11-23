@@ -16,7 +16,7 @@ Orange replaces Forest Green. Green only for verified/approved. Fonts: Manrope/P
 ## Routes
 Public: `/ /about /discover /class-of /sign-in /register /community/[slug] /institution/[slug] /join/[code]`
 Member: `/app/{dashboard,dashboard/header,my-classes,profile,alumni,businesses,locations,events,gallery,announcements,dues,network,notifications,settings}`
-Admin: `/admin/{dashboard,members,communities,institutions,institution,roles,permissions,approvals,moderation,dues,automations,security,audit-logs,settings}`
+Admin: `/admin/{dashboard,members,accounts,content,communities,institutions,institution,roles,permissions,approvals,moderation,dues,automations,security,audit-logs,settings}`
 
 ## Security rules
 RLS on every exposed table; server-side authorization; scoped RBAC (platform / institution / community); never trust client role names or user-editable auth metadata; service keys server-only; no stale-JWT-only authorization; audit all privileged mutations; MFA for privileged admins; separation of financial duties.
